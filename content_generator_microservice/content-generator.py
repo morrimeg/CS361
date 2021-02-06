@@ -5,12 +5,14 @@
 ## Description:
 
 import tkinter as tk
+from tkinter import ttk
 
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.pack()
+        self.grid()
+        #self.pack()
         #self.create_widgets()
         self.primary_keyword_text_box()
         self.secondary_keyword_text_box()
@@ -24,7 +26,7 @@ class Application(tk.Frame):
 
         self.quit = tk.Button(self, text="QUIT", fg="red",
                               command=self.master.destroy)
-        self.quit.pack(side="bottom")
+        #self.quit.pack(side="bottom")
 
     def say_hi(self):
         print("hi there, everyone!")
@@ -34,7 +36,8 @@ class Application(tk.Frame):
         # Add text before textbox to tell users what to do
         primary_text = tk.Text(self, height=2, width=30)
         # activate
-        primary_text.pack()
+        #primary_text.pack()
+        primary_text.grid(column=1, row=3)
         # Place text in textbox
         primary_text.insert(tk.END, "Place your primary search term here ("
                                     "e.g. dog)\n")
@@ -44,7 +47,9 @@ class Application(tk.Frame):
         # Should add text to the entry box -- but doesn't
         self.primary_keyword["text"] = "Primary Keyword"
         # Activates the text entry box
-        self.primary_keyword.pack(side="bottom")
+        #self.primary_keyword.pack(side="bottom")
+        self.primary_keyword.grid(column=1, row=4)
+
 
     def secondary_keyword_text_box(self):
         """
@@ -55,7 +60,8 @@ class Application(tk.Frame):
         # Add text before textbox to tell users what to do
         secondary_text = tk.Text(self, height=2, width=30)
         # activate
-        secondary_text.pack()
+        #secondary_text.pack()
+        secondary_text.grid(column=3, row=3)
         # Place text in textbox
         secondary_text.insert(tk.END, "Place your secondary search term here ("
                                     "e.g. bites)\n")
@@ -65,7 +71,8 @@ class Application(tk.Frame):
         # Should add text to the entry box -- but doesn't
         self.secondary_keyword["text"] = "Secondary Keyword"
         # Activates the text entry box
-        self.secondary_keyword.pack(side="bottom")
+        #self.secondary_keyword.pack(side="bottom")
+        self.secondary_keyword.grid(column=3, row=4)
 
     def get_keywords(self):
         """"""
@@ -77,14 +84,19 @@ class Application(tk.Frame):
         :return:
         """
 
-        self.gen_para = tk.Button(self, text="Generate Paragraph!", fg="red",
+        self.gen_para = tk.Button(self, text="Generate Paragraph!", fg="black",
                               command=self.get_keywords())
-        self.gen_para.pack(side="bottom")
+        #self.gen_para.pack(side="bottom")
+        self.gen_para.grid(column=2, row=8)
 
 
 root = tk.Tk()
 root.title("Content Generator")
 root.geometry('800x400')
+root = ttk.Frame(root, padding="3 3 12 12")
+root.grid(column=0, row=0)
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
 app = Application(master=root)
 app.mainloop()
 
