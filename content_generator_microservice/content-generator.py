@@ -17,6 +17,7 @@ class Application(tk.Frame):
         self.primary_keyword_text_box()
         self.secondary_keyword_text_box()
         self.generate_paragraph_button()
+        self.empty_results_box()
 
     def create_widgets(self):
         self.hi_there = tk.Button(self)
@@ -61,10 +62,9 @@ class Application(tk.Frame):
         secondary_text = tk.Text(self, height=2, width=30)
         # activate
         #secondary_text.pack()
-        secondary_text.grid(column=3, row=3)
+        secondary_text.grid(column=1, row=6)
         # Place text in textbox
-        secondary_text.insert(tk.END, "Place your secondary search term here ("
-                                    "e.g. bites)\n")
+        secondary_text.insert(tk.END, "Place your secondary search term here e.g. bites\n")
 
         # Creates the text entry box for entering the primary keyword
         self.secondary_keyword = tk.Entry(self, width=20)
@@ -72,11 +72,20 @@ class Application(tk.Frame):
         self.secondary_keyword["text"] = "Secondary Keyword"
         # Activates the text entry box
         #self.secondary_keyword.pack(side="bottom")
-        self.secondary_keyword.grid(column=3, row=4)
+        self.secondary_keyword.grid(column=1, row=7)
 
     def get_keywords(self):
         """"""
 
+    # This grid stuff needs to be fixed
+    def empty_results_box(self):
+        """
+
+        :return:
+        """
+        # Add blank textbox to be filled out
+        secondary_text = tk.Text(self, height=50, width=50)
+        secondary_text.grid(column=10, row=9)
 
     def generate_paragraph_button(self):
         """
@@ -87,7 +96,7 @@ class Application(tk.Frame):
         self.gen_para = tk.Button(self, text="Generate Paragraph!", fg="black",
                               command=self.get_keywords())
         #self.gen_para.pack(side="bottom")
-        self.gen_para.grid(column=2, row=8)
+        self.gen_para.grid(column=1, row=8)
 
 
 root = tk.Tk()
