@@ -120,26 +120,6 @@ class Application(tk.Frame):
 
 # Testing out wiki api
 def main():
-    #dog = w.search("dog")
-    #print(dog)
-    #print()
-    #dog2 = w.page(dog[0], auto_suggest=False, redirect=True)
-    #text = dog2.content
-    # Clean text -- remove headings
-    #text = re.sub(r'==.*?==+', '', text)
-    #text
-    # print()
-    # print(dog2.summary)
-    # word = 'Neutering'
-    #
-    # #print(dog2.content.find(word))
-    # print()
-    #
-    # word_index = dog2.content.find(word)
-    # para = dog2.content.split()
-    # print(para)
-    # print(len(para)) # true len
-    # print(para[7633]) # true last word
 
     primary_keyword = "Dog"
     secondary_keyword = "familiaris"
@@ -163,10 +143,44 @@ def main():
 
     # Clean up text to get rid of footnote markers
     text = re.sub(r'\[.*?\]+', '', text)
+    # lower case everything
+    text = text.lower()
 
-    print(text)
+    #print(text)
+    #print()
 
     # Now we can find the secondary keyword
+    # Each paragraph ends with \n. So we need to split each line by \n
+    # I found out how to do this from the following SO article:
+    # https://stackoverflow.com/questions/14801057/python-splitting-to-the-newline-character
+    list_of_lines = text.splitlines()
+    #print()
+    #print(list_of_lines[0])
+
+    # Now we will iterate through each line, and break up each line word
+    # for word to see if the secondary keyword is in a paragraph.
+    for i in range(len(list_of_lines)):
+        # split the sentence into individual words
+        # Found this SO helpful:
+        # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-sentence-contains-a-certain-word-in-python-and-then-perform
+        words = list_of_lines[i]
+        words_list = words.split()
+        #print()
+        #print(words)
+
+        if secondary_keyword.lower() in words_list and \
+                primary_keyword.lower() in words_list:
+            # see if one of
+            # the words in
+        # the
+            # sentence is the
+            # word we want
+            #print(list_of_lines[i])
+            found_words = list_of_lines[i]
+            break
+            # do we want this to print just the 1st paragraph found? or all?
+
+    print(found_words)
 
 
 
