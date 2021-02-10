@@ -6,6 +6,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+
 import wikipedia as w
 from bs4 import BeautifulSoup
 import requests
@@ -13,6 +14,8 @@ import re
 
 
 # Learned about Wikipedia API here: https://towardsdatascience.com/wikipedia-api-for-python-241cfae09f1c
+# References:
+# https://levelup.gitconnected.com/two-simple-ways-to-scrape-text-from-wikipedia-in-python-9ce07426579b
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -117,10 +120,14 @@ class Application(tk.Frame):
 
 # Testing out wiki api
 def main():
-    # dog = w.search("dog")
-    # print(dog)
-    # print()
-    # dog2 = w.page(dog[0], auto_suggest=False, redirect=True)
+    #dog = w.search("dog")
+    #print(dog)
+    #print()
+    #dog2 = w.page(dog[0], auto_suggest=False, redirect=True)
+    #text = dog2.content
+    # Clean text -- remove headings
+    #text = re.sub(r'==.*?==+', '', text)
+    #text
     # print()
     # print(dog2.summary)
     # word = 'Neutering'
@@ -137,26 +144,29 @@ def main():
     primary_keyword = "Dog"
     secondary_keyword = "familiaris"
 
-    def findWholeWord(w):
+    #def findWholeWord(w):
 
-        return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
+    #    return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
     
+    # Send request to Wikipedia page using the primary keyword
     res = requests.get("https://en.wikipedia.org/wiki/"+ primary_keyword)
-    print(res)
-    
+
     soup = BeautifulSoup(res.text, 'html.parser')
-    
-    for item in soup.find_all("p"):
-        #https://stackoverflow.com/questions/5319922/python-check-if-word-is-in-a-string
-        if findWholeWord(secondary_keyword)(item.text) is True:
-            print(item.text)
-        
-        print(item.text)
 
+    # soup.find_all('p')[3:]) bypasses synomyms that are included as a paragraph
+    # this page helped me figure the above out:
+    # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
 
+    text = ''
+    for paragraph in soup.find_all('p')[3:]:
+        text += paragraph.text
 
+    # Clean up text to get rid of footnote markers
+    text = re.sub(r'\[.*?\]+', '', text)
 
+    print(text)
 
+    # Now we can find the secondary keyword
 
 
 
