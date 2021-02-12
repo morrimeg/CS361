@@ -204,7 +204,6 @@ class FindText:
 if __name__ == "__main__":
     # If there is only one argument in the command prompt (e.g. no input.csv
     # file, then run the GUI.
-    f = FindText()
 
     if len(sys.argv) < 1:
         print("Insufficient Arguments Provided. Quitting.")
@@ -223,14 +222,35 @@ if __name__ == "__main__":
 
     # Else, read in the input file and make the appropriate calls to Wikipedia.
     elif sys.argv[1] == "input.csv":
-        primary_keyword = "Dog"
-        secondary_keyword = "familiaris"
+        # First we will read in the csv
+        # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
+        with open(sys.argv[1], newline='') as f:
+            reader = csv.reader(f)
+            data = list(reader)
 
-        s = f.send_http_request(primary_keyword)
-        t = f.parse_wikipedia_page_text(s)
-        t = f.clean_text(t)
-        final = f.find_paragraph(t, primary_keyword, secondary_keyword)
-        print(final)
+        # Now that we have our words, we need to parse them
+        primary_keyword = data[1][0]
+        secondary_keyword = data[2][0]
+
+        # clean up primary_keyword since there is a semicolon
+        primary_keyword = re.sub(r';', '', primary_keyword)
+
+        # Instantiate a findText object
+        f = FindText()
+
+        # Send http request to Wikipedia
+        wiki_page = f.send_http_request(primary_keyword)
+
+        # Parse Wiki text
+        text_grab = f.parse_wikipedia_page_text(wiki_page)
+
+        # Clean text
+        clean_text = f.clean_text(text_grab)
+
+        # Find the paragraph with both primary and secondary keywords!
+        paragraph_found = f.find_paragraph(clean_text, primary_keyword,
+                                           secondary_keyword)
+        print(paragraph_found)
 
     else:
         print("Incorrect Argument(s) Provided. Quitting.")
