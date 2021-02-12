@@ -6,8 +6,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-
-import wikipedia as w
+import csv
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -108,6 +107,94 @@ class Application(tk.Frame):
         self.gen_para.grid(column=1, row=8)
 
 
+class FindText():
+    def __init__(self):
+        """
+
+        """
+        self.primary_keyword = ""
+        self.secondary_keyword = ""
+
+    def send_http_request(self, primary_keyword):
+        """
+
+        :return:
+        """
+        # Send request to Wikipedia page using the primary keyword
+        res = requests.get("https://en.wikipedia.org/wiki/" + primary_keyword)
+
+        # Parse request page
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        return soup
+
+    def parse_wikipedia_page_text(self, soup):
+        """
+
+        :param soup:
+        :return:
+        """
+
+        # bypasses synomyms that are included as a paragraph tag on Wiki
+        # this page helped me figure the above out:
+        # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
+
+        text = ''
+        for paragraph in soup.find_all('p')[3:]:
+            text += paragraph.text
+
+        return text
+
+    def clean_text(self, text):
+        """
+
+        :param text:
+        :return:
+        """
+        # Clean up text to get rid of footnote markers
+        text = re.sub(r'\[.*?\]+', '', text)
+        # lower case everything
+        text = text.lower()
+
+        return text
+
+    def find_paragraph(self, text, primary_keyword, secondary_keyword):
+        """
+
+        :param text:
+        :param primary_keyword
+        :param secondary_keyword
+        :return:
+        """
+        # Now we can find the secondary keyword
+        # Each paragraph ends with \n. So we need to split each line by \n
+        # I found out how to do this from the following SO article:
+        # https://stackoverflow.com/questions/14801057/python-splitting-to-the-newline-character
+        list_of_lines = text.splitlines()
+        found_paragraph = []  # empty list to hold the found paragraph
+
+        # Now we will iterate through each line, and break up each line word
+        # for word to see if the secondary keyword is in a paragraph.
+        for i in range(len(list_of_lines)):
+            # split the sentence into individual words
+            # Found this SO helpful:
+            # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-sentence-contains-a-certain-word-in-python-and-then-perform
+            words = list_of_lines[i]
+            words_list = words.split()
+
+            if secondary_keyword.lower() in words_list and \
+                    primary_keyword.lower() in words_list:
+
+                # see if one of the words in the sentence is the word we want
+                found_paragraph = list_of_lines[i]
+                break
+                # do we want this to print just the 1st paragraph found? or all?
+
+        return found_paragraph
+
+
+
+
 # root = tk.Tk()
 # root.title("Content Generator")
 # root.geometry('800x400')
@@ -124,64 +211,12 @@ def main():
     primary_keyword = "Dog"
     secondary_keyword = "familiaris"
 
-    #def findWholeWord(w):
-
-    #    return re.compile(r'\b({0})\b'.format(w), flags=re.IGNORECASE).search
-    
-    # Send request to Wikipedia page using the primary keyword
-    res = requests.get("https://en.wikipedia.org/wiki/"+ primary_keyword)
-
-    soup = BeautifulSoup(res.text, 'html.parser')
-
-    # soup.find_all('p')[3:]) bypasses synomyms that are included as a paragraph
-    # this page helped me figure the above out:
-    # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
-
-    text = ''
-    for paragraph in soup.find_all('p')[3:]:
-        text += paragraph.text
-
-    # Clean up text to get rid of footnote markers
-    text = re.sub(r'\[.*?\]+', '', text)
-    # lower case everything
-    text = text.lower()
-
-    #print(text)
-    #print()
-
-    # Now we can find the secondary keyword
-    # Each paragraph ends with \n. So we need to split each line by \n
-    # I found out how to do this from the following SO article:
-    # https://stackoverflow.com/questions/14801057/python-splitting-to-the-newline-character
-    list_of_lines = text.splitlines()
-    #print()
-    #print(list_of_lines[0])
-
-    # Now we will iterate through each line, and break up each line word
-    # for word to see if the secondary keyword is in a paragraph.
-    for i in range(len(list_of_lines)):
-        # split the sentence into individual words
-        # Found this SO helpful:
-        # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-sentence-contains-a-certain-word-in-python-and-then-perform
-        words = list_of_lines[i]
-        words_list = words.split()
-        #print()
-        #print(words)
-
-        if secondary_keyword.lower() in words_list and \
-                primary_keyword.lower() in words_list:
-            # see if one of
-            # the words in
-        # the
-            # sentence is the
-            # word we want
-            #print(list_of_lines[i])
-            found_words = list_of_lines[i]
-            break
-            # do we want this to print just the 1st paragraph found? or all?
-
-    print(found_words)
-
+    f = FindText()
+    s = f.send_http_request(primary_keyword)
+    t = f.parse_wikipedia_page_text(s)
+    t = f.clean_text(t)
+    final = f.find_paragraph(t, primary_keyword, secondary_keyword)
+    print(final)
 
 
 main()
