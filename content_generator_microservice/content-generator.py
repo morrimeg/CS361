@@ -25,6 +25,9 @@ class Application(tk.Frame):
         self.secondary_keyword_text_box()
         self.generate_paragraph_button()
         self.empty_results_box()
+        self.get_keywords()
+        self.primary_keyword = ""
+        self.secondary_keyword = ""
 
     def create_widgets(self):
         self.hi_there = tk.Button(self)
@@ -39,6 +42,22 @@ class Application(tk.Frame):
     def say_hi(self):
         print("hi there, everyone!")
 
+    def set_primary_keyword(self, primary_keyword):
+        """
+        :param primary_keyword:
+        :return:
+        """
+        self.primary_keyword = primary_keyword
+
+    def set_secondary_keyword(self, secondary_keyword):
+        """
+
+        :param secondary_keyword:
+        :return:
+        """
+        self.secondary_keyword = secondary_keyword
+
+
     def primary_keyword_text_box(self):
         # Add text before textbox to tell users what to do
         primary_text = tk.Text(self, height=2, width=30)
@@ -50,12 +69,14 @@ class Application(tk.Frame):
                                     "e.g. dog)\n")
 
         # Creates the text entry box for entering the primary keyword
-        self.primary_keyword = tk.Entry(self, width=20)
+        primary_keyword = tk.Entry(self, width=20)
         # Should add text to the entry box -- but doesn't
-        self.primary_keyword["text"] = "Primary Keyword"
+        primary_keyword["text"] = "Primary Keyword"
         # Activates the text entry box
         # self.primary_keyword.pack(side="bottom")
-        self.primary_keyword.grid(column=1, row=4)
+        primary_keyword.grid(column=1, row=4)
+
+        self.set_primary_keyword(primary_keyword.get())
 
     def secondary_keyword_text_box(self):
         """
@@ -73,15 +94,25 @@ class Application(tk.Frame):
                               "Place your secondary search term here e.g. bites\n")
 
         # Creates the text entry box for entering the primary keyword
-        self.secondary_keyword = tk.Entry(self, width=20)
+        secondary_keyword = tk.Entry(self, width=20)
         # Should add text to the entry box -- but doesn't
-        self.secondary_keyword["text"] = "Secondary Keyword"
+        secondary_keyword["text"] = "Secondary Keyword"
         # Activates the text entry box
         # self.secondary_keyword.pack(side="bottom")
-        self.secondary_keyword.grid(column=1, row=7)
+        secondary_keyword.grid(column=1, row=7)
+
+        self.set_secondary_keyword(secondary_keyword.get())
+
 
     def get_keywords(self):
-        """"""
+        """
+        param: primary_keyword:
+        param: secondary_keyword:
+        :return:
+        """
+        print("Primary: %s\nSecondary: %s" % (self.primary_keyword,
+                                              self.secondary_keyword))
+
 
     # This grid stuff needs to be fixed
     def empty_results_box(self):
@@ -198,15 +229,85 @@ if __name__ == "__main__":
         exit()
 
     if len(sys.argv) == 1:
-        root = tk.Tk()
-        root.title("Content Generator")
-        root.geometry('800x400')
-        root = ttk.Frame(root, padding="3 3 12 12")
-        root.grid(column=0, row=0)
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
-        app = Application(master=root)
-        app.mainloop()
+
+        def show_entry_fields():
+            # 1st delete any content left over in output box
+            e3.delete('1.0', tk.END)
+
+            print("Primary Word: %s\nSecondary Word: %s" % (e1.get(),
+                                                            e2.get()))
+
+            primary_keyword = e1.get()
+            secondary_keyword = e2.get()
+
+            # Instantiate a findText object
+            f = FindText()
+
+            # Send http request to Wikipedia
+            wiki_page = f.send_http_request(primary_keyword)
+
+            # Parse Wiki text
+            text_grab = f.parse_wikipedia_page_text(wiki_page)
+
+            # Clean text
+            clean_text = f.clean_text(text_grab)
+
+            # Find the paragraph with both primary and secondary keywords!
+            paragraph_found = f.find_paragraph(clean_text, primary_keyword,
+                                               secondary_keyword)
+
+            # Insert into text box
+            e3.insert('1.0', paragraph_found)
+
+            # Write output to a csv
+            # https://realpython.com/python-csv/
+            with open('output2.csv', mode='w') as output_file:
+                output_writer = csv.writer(output_file, delimiter=',',
+                                           quotechar='"',
+                                           quoting=csv.QUOTE_MINIMAL)
+
+                output_writer.writerow(['input_keywords', 'output_content'])
+                output_writer.writerow(
+                    [primary_keyword + ';' + secondary_keyword,
+                     paragraph_found])
+
+            # Clear input
+            e1.delete(0, tk.END)
+            e2.delete(0, tk.END)
+
+        master = tk.Tk()
+        master.title("Content Generator")
+        master.geometry('600x800')
+        tk.Label(master, text="Welcome to the Content Generator! Please "
+                              "place your search terms in the boxes "
+                              "below.").grid(row=0, column=3)
+        tk.Label(master, text="Primary Word").grid(row=1)
+        tk.Label(master, text="Secondary Word").grid(row=2)
+
+        e1 = tk.Entry(master)
+        e2 = tk.Entry(master)
+        e3 = tk.Text(master, height=50, width=50, wrap=tk.WORD)
+
+        e1.grid(row=1, column=1)
+        e2.grid(row=2, column=1)
+        e3.grid(row=1, column=5)
+
+        tk.Button(master,
+                  text='Generate Paragraph', command=show_entry_fields).grid(
+            row=3, column=1, sticky=tk.W, pady=4)
+
+
+        master.mainloop()
+
+        # root = tk.Tk()
+        # root.title("Content Generator")
+        # root.geometry('800x400')
+        # root = ttk.Frame(root, padding="3 3 12 12")
+        # root.grid(column=0, row=0)
+        # root.columnconfigure(0, weight=1)
+        # root.rowconfigure(0, weight=1)
+        # app = Application(master=root)
+        # app.mainloop()
 
     # Else, read in the input file and make the appropriate calls to Wikipedia.
     elif sys.argv[1] == "input.csv":
@@ -240,6 +341,7 @@ if __name__ == "__main__":
                                            secondary_keyword)
 
         # Write output to a csv
+        # https://realpython.com/python-csv/
         with open('output.csv', mode='w') as output_file:
             output_writer = csv.writer(output_file, delimiter=',',
                                          quotechar='"',
