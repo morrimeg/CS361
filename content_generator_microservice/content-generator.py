@@ -185,20 +185,8 @@ class FindText:
                 # see if one of the words in the sentence is the word we want
                 found_paragraph = list_of_lines[i]
                 break
-                # do we want this to print just the 1st paragraph found? or all?
 
         return found_paragraph
-
-
-# root = tk.Tk()
-# root.title("Content Generator")
-# root.geometry('800x400')
-# root = ttk.Frame(root, padding="3 3 12 12")
-# root.grid(column=0, row=0)
-# root.columnconfigure(0, weight=1)
-# root.rowconfigure(0, weight=1)
-# app = Application(master=root)
-# app.mainloop()
 
 
 if __name__ == "__main__":
@@ -250,7 +238,15 @@ if __name__ == "__main__":
         # Find the paragraph with both primary and secondary keywords!
         paragraph_found = f.find_paragraph(clean_text, primary_keyword,
                                            secondary_keyword)
-        print(paragraph_found)
+
+        # Write output to a csv
+        with open('output.csv', mode='w') as output_file:
+            output_writer = csv.writer(output_file, delimiter=',',
+                                         quotechar='"',
+                                         quoting=csv.QUOTE_MINIMAL)
+
+            output_writer.writerow(['input_keywords', 'output_content'])
+            output_writer.writerow([primary_keyword + ';' + secondary_keyword, paragraph_found])
 
     else:
         print("Incorrect Argument(s) Provided. Quitting.")
