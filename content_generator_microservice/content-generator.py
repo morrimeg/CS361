@@ -6,10 +6,8 @@
 
 import tkinter as tk
 from tkinter import ttk
-import csv
+import csv, sys, re, requests
 from bs4 import BeautifulSoup
-import requests
-import re
 
 
 # Learned about Wikipedia API here: https://towardsdatascience.com/wikipedia-api-for-python-241cfae09f1c
@@ -107,7 +105,7 @@ class Application(tk.Frame):
         self.gen_para.grid(column=1, row=8)
 
 
-class FindText():
+class FindText:
     def __init__(self):
         """
 
@@ -138,7 +136,6 @@ class FindText():
         # bypasses synomyms that are included as a paragraph tag on Wiki
         # this page helped me figure the above out:
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
-
         text = ''
         for paragraph in soup.find_all('p')[3:]:
             text += paragraph.text
@@ -153,6 +150,7 @@ class FindText():
         """
         # Clean up text to get rid of footnote markers
         text = re.sub(r'\[.*?\]+', '', text)
+
         # lower case everything
         text = text.lower()
 
@@ -184,15 +182,12 @@ class FindText():
 
             if secondary_keyword.lower() in words_list and \
                     primary_keyword.lower() in words_list:
-
                 # see if one of the words in the sentence is the word we want
                 found_paragraph = list_of_lines[i]
                 break
                 # do we want this to print just the 1st paragraph found? or all?
 
         return found_paragraph
-
-
 
 
 # root = tk.Tk()
@@ -205,18 +200,38 @@ class FindText():
 # app = Application(master=root)
 # app.mainloop()
 
-# Testing out wiki api
-def main():
 
-    primary_keyword = "Dog"
-    secondary_keyword = "familiaris"
-
+if __name__ == "__main__":
+    # If there is only one argument in the command prompt (e.g. no input.csv
+    # file, then run the GUI.
     f = FindText()
-    s = f.send_http_request(primary_keyword)
-    t = f.parse_wikipedia_page_text(s)
-    t = f.clean_text(t)
-    final = f.find_paragraph(t, primary_keyword, secondary_keyword)
-    print(final)
 
+    if len(sys.argv) < 1:
+        print("Insufficient Arguments Provided. Quitting.")
+        exit()
 
-main()
+    if len(sys.argv) == 1:
+        root = tk.Tk()
+        root.title("Content Generator")
+        root.geometry('800x400')
+        root = ttk.Frame(root, padding="3 3 12 12")
+        root.grid(column=0, row=0)
+        root.columnconfigure(0, weight=1)
+        root.rowconfigure(0, weight=1)
+        app = Application(master=root)
+        app.mainloop()
+
+    # Else, read in the input file and make the appropriate calls to Wikipedia.
+    elif sys.argv[1] == "input.csv":
+        primary_keyword = "Dog"
+        secondary_keyword = "familiaris"
+
+        s = f.send_http_request(primary_keyword)
+        t = f.parse_wikipedia_page_text(s)
+        t = f.clean_text(t)
+        final = f.find_paragraph(t, primary_keyword, secondary_keyword)
+        print(final)
+
+    else:
+        print("Incorrect Argument(s) Provided. Quitting.")
+        exit()
