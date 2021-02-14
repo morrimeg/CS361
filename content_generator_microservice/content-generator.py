@@ -42,8 +42,8 @@ class ContentGeneratorApp(tk.Frame):
         :return:
         """
         # Create labels for the text entry boxes
-        tk.Label(self.master, text="Primary Word").grid(row=1)
-        tk.Label(self.master, text="Secondary Word").grid(row=2)
+        tk.Label(self.master, text="Primary Word (e.g. Dog)").grid(row=2)
+        tk.Label(self.master, text="Secondary Word (e.g Breed)").grid(row=3)
 
     def create_primary_keyword_entry_box(self):
         """
@@ -55,7 +55,7 @@ class ContentGeneratorApp(tk.Frame):
         primary_entry = tk.Entry(self.master)
 
         # Place box on grid layout
-        primary_entry.grid(row=1, column=1)
+        primary_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
 
         return primary_entry
 
@@ -69,7 +69,7 @@ class ContentGeneratorApp(tk.Frame):
         secondary_entry = tk.Entry(self.master)
 
         # Place box on grid
-        secondary_entry.grid(row=2, column=1)
+        secondary_entry.grid(row=3, column=1, sticky=tk.W)
 
         return secondary_entry
 
@@ -80,10 +80,11 @@ class ContentGeneratorApp(tk.Frame):
         :return: output_box:
         """
         # Create the output box for the returned paragraph
-        output_box = tk.Text(self.master, height=50, width=50, wrap=tk.WORD)
+        output_box = tk.Text(self.master, height=40, width=40, wrap=tk.WORD)
 
         # Place output box on grid
-        output_box.grid(row=1, column=4)
+        output_box.grid(row=2, column=3, columnspan=4, rowspan=4,
+                        sticky=tk.E)
 
         return output_box
 
@@ -96,10 +97,10 @@ class ContentGeneratorApp(tk.Frame):
         # Create a button, and set it to run_content_generator_backend when
         # clicked.
         tk.Button(self.master, text='Generate Paragraph',
-                  command=self.run_content_generator_backend).grid(row=3,
+                  command=self.run_content_generator_backend).grid(row=4,
                                                                    column=1,
                                                                    sticky=tk.W,
-                                                                   pady=4)
+                                                                   pady=2)
 
     def run_content_generator_backend(self):
         """
@@ -125,7 +126,8 @@ class ContentGeneratorApp(tk.Frame):
 
         # Run all of the code in FindText in order to find a paragraph if one
         # exists
-        paragraph_found = f.run_paragraph_finder(primary_keyword, secondary_keyword)
+        paragraph_found = f.run_paragraph_finder(primary_keyword,
+                                                 secondary_keyword)
 
         # Insert into text box
         self.output_text.insert('1.0', paragraph_found)
@@ -143,7 +145,7 @@ class ContentGeneratorApp(tk.Frame):
 
 class FindText:
     def __init__(self):
-        self.primary_keyword = ""    # variable to hold primary keyword
+        self.primary_keyword = ""  # variable to hold primary keyword
         self.secondary_keyword = ""  # variable to hold secondary keyword
 
     def send_http_request(self, primary_keyword):
@@ -267,9 +269,10 @@ class FindText:
 
         # Find the paragraph with both primary and secondary keywords!
         paragraph_found = self.find_paragraph(clean_text, primary_keyword,
-                                           secondary_keyword)
+                                              secondary_keyword)
 
         return paragraph_found
+
 
 class CsvManipulation:
     def __init__(self):
@@ -318,8 +321,6 @@ class CsvManipulation:
                 [first_word + ';' + second_word, paragraph])
 
 
-
-
 if __name__ == "__main__":
     # If there is only one argument in the command prompt (e.g. no input.csv
     # file, then run the GUI.
@@ -330,12 +331,16 @@ if __name__ == "__main__":
         # https://www.python-course.eu/tkinter_entry_widgets.php
         root = tk.Tk()
         root.title("Content Generator")  # name of the application
-        root.geometry('1000x500')  # initial size of the desktop app
+        root.geometry('1000x650')  # initial size of the desktop app
 
         # Welcome message
         tk.Label(root, text="Welcome to the Content Generator! Please "
                             "place your search terms in the boxes "
-                            "below.").grid(row=0, column=3)
+                            "below \nin order to find a paragraph.").grid(
+                                                                        row=0,
+                                                                        column=3,
+                                                                        columnspan=5,
+                                                                        sticky=tk.NSEW)
 
         # Call the ContentGeneratorApp class to actually run the app
         app = ContentGeneratorApp(master=root)
@@ -365,7 +370,8 @@ if __name__ == "__main__":
                                                  secondary_keyword)
 
         # Export to csv. This will export the csv to your current directory
-        c.export_csv('output.csv', primary_keyword, secondary_keyword, paragraph_found)
+        c.export_csv('output.csv', primary_keyword, secondary_keyword,
+                     paragraph_found)
 
     # Otherwise if an incorrect argument was input, quit.
     else:
