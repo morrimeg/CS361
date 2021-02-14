@@ -234,6 +234,50 @@ class FindText:
 
         return paragraph_found
 
+class CsvManipulation:
+    def __init__(self):
+        """
+
+        """
+
+    def import_csv(self, filename):
+        """
+
+        :param filename:
+        :return:
+        """
+        # First we will read in the csv
+        # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
+        with open(filename, newline='') as f:
+            reader = csv.reader(f)
+            data = list(reader)
+
+        return data
+
+    def export_csv(self, filename, first_word, second_word, paragraph):
+        """
+
+        :param filename:
+        :param first_word:
+        :param second_word:
+        :param paragraph:
+        :return:
+        """
+        # Write output to a csv
+        # https://realpython.com/python-csv/
+        with open(filename, mode='w') as output_file:
+            output_writer = csv.writer(output_file, delimiter=',',
+                                       quotechar='"',
+                                       quoting=csv.QUOTE_MINIMAL)
+            # Write header row
+            output_writer.writerow(['input_keywords', 'output_content'])
+
+            # Write content row
+            output_writer.writerow(
+                [first_word + ';' + second_word, paragraph])
+
+
+
 
 if __name__ == "__main__":
     # If there is only one argument in the command prompt (e.g. no input.csv
@@ -262,15 +306,15 @@ if __name__ == "__main__":
     # Else, read in the input file and make the appropriate calls to Wikipedia.
     elif sys.argv[1] == "input.csv":
 
-        # First we will read in the csv
-        # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
-        with open(sys.argv[1], newline='') as f:
-            reader = csv.reader(f)
-            data = list(reader)
+        # Instantiate an object for the CsvManipulation class
+        c = CsvManipulation()
+
+        # Import the file given
+        file_data = c.import_csv(sys.argv[1])
 
         # Now that we have our words, we need to parse them
-        primary_keyword = data[1][0]
-        secondary_keyword = data[2][0]
+        primary_keyword = file_data[1][0]
+        secondary_keyword = file_data[2][0]
 
         # clean up primary_keyword since there is a semicolon
         primary_keyword = re.sub(r';', '', primary_keyword)
@@ -282,16 +326,8 @@ if __name__ == "__main__":
         paragraph_found = f.run_paragraph_finder(primary_keyword,
                                                  secondary_keyword)
 
-        # Write output to a csv
-        # https://realpython.com/python-csv/
-        with open('output.csv', mode='w') as output_file:
-            output_writer = csv.writer(output_file, delimiter=',',
-                                       quotechar='"',
-                                       quoting=csv.QUOTE_MINIMAL)
-
-            output_writer.writerow(['input_keywords', 'output_content'])
-            output_writer.writerow(
-                [primary_keyword + ';' + secondary_keyword, paragraph_found])
+        # Export to csv. This will export the csv to your current directory
+        c.export_csv('output.csv', primary_keyword, secondary_keyword, paragraph_found)
 
     else:
         print("Incorrect Argument(s) Provided. Quitting.")
