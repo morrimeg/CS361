@@ -14,126 +14,123 @@ from bs4 import BeautifulSoup
 # References:
 # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text-from-wikipedia-in-python-9ce07426579b
 
-class Application(tk.Frame):
+
+# I used the following site to get my code for the GUI:
+# https://www.python-course.eu/tkinter_entry_widgets.php
+class ContentGeneratorApp(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
         self.grid()
-        # self.pack()
-        # self.create_widgets()
-        self.primary_keyword_text_box()
-        self.secondary_keyword_text_box()
+        self.create_labels()
+        self.primary = self.create_primary_keyword_entry_box()
+        self.secondary = self.create_secondary_keyword_entry_box()
+        self.output_text = self.create_text_output_box()
         self.generate_paragraph_button()
-        self.empty_results_box()
-        self.get_keywords()
-        self.primary_keyword = ""
-        self.secondary_keyword = ""
 
-    def create_widgets(self):
-        self.hi_there = tk.Button(self)
-        self.hi_there["text"] = "Hello World\n(click me)"
-        self.hi_there["command"] = self.say_hi
-        self.hi_there.pack(side="top")
-
-        self.quit = tk.Button(self, text="QUIT", fg="red",
-                              command=self.master.destroy)
-        # self.quit.pack(side="bottom")
-
-    def say_hi(self):
-        print("hi there, everyone!")
-
-    def set_primary_keyword(self, primary_keyword):
-        """
-        :param primary_keyword:
-        :return:
-        """
-        self.primary_keyword = primary_keyword
-
-    def set_secondary_keyword(self, secondary_keyword):
-        """
-
-        :param secondary_keyword:
-        :return:
-        """
-        self.secondary_keyword = secondary_keyword
-
-
-    def primary_keyword_text_box(self):
-        # Add text before textbox to tell users what to do
-        primary_text = tk.Text(self, height=2, width=30)
-        # activate
-        # primary_text.pack()
-        primary_text.grid(column=1, row=3)
-        # Place text in textbox
-        primary_text.insert(tk.END, "Place your primary search term here ("
-                                    "e.g. dog)\n")
-
-        # Creates the text entry box for entering the primary keyword
-        primary_keyword = tk.Entry(self, width=20)
-        # Should add text to the entry box -- but doesn't
-        primary_keyword["text"] = "Primary Keyword"
-        # Activates the text entry box
-        # self.primary_keyword.pack(side="bottom")
-        primary_keyword.grid(column=1, row=4)
-
-        self.set_primary_keyword(primary_keyword.get())
-
-    def secondary_keyword_text_box(self):
+    def create_labels(self):
         """
 
         :return:
         """
+        tk.Label(self.master, text="Primary Word").grid(row=1)
+        tk.Label(self.master, text="Secondary Word").grid(row=2)
 
-        # Add text before textbox to tell users what to do
-        secondary_text = tk.Text(self, height=2, width=30)
-        # activate
-        # secondary_text.pack()
-        secondary_text.grid(column=1, row=6)
-        # Place text in textbox
-        secondary_text.insert(tk.END,
-                              "Place your secondary search term here e.g. bites\n")
-
-        # Creates the text entry box for entering the primary keyword
-        secondary_keyword = tk.Entry(self, width=20)
-        # Should add text to the entry box -- but doesn't
-        secondary_keyword["text"] = "Secondary Keyword"
-        # Activates the text entry box
-        # self.secondary_keyword.pack(side="bottom")
-        secondary_keyword.grid(column=1, row=7)
-
-        self.set_secondary_keyword(secondary_keyword.get())
-
-
-    def get_keywords(self):
-        """
-        param: primary_keyword:
-        param: secondary_keyword:
-        :return:
-        """
-        print("Primary: %s\nSecondary: %s" % (self.primary_keyword,
-                                              self.secondary_keyword))
-
-
-    # This grid stuff needs to be fixed
-    def empty_results_box(self):
+    def create_primary_keyword_entry_box(self):
         """
 
         :return:
         """
-        # Add blank textbox to be filled out
-        secondary_text = tk.Text(self, height=50, width=50)
-        secondary_text.grid(column=10, row=9)
+        primary_entry = tk.Entry(self.master)
+        primary_entry.grid(row=1, column=1)
+        return primary_entry
+
+    def create_secondary_keyword_entry_box(self):
+        """
+
+        :return:
+        """
+        secondary_entry = tk.Entry(self.master)
+        secondary_entry.grid(row=2, column=1)
+        return secondary_entry
+
+    def create_text_output_box(self):
+        """
+        The function create_text_output_box creates the box the paragraph
+        output will go into.
+        :return:
+        """
+        output_box = tk.Text(self.master, height=50, width=50, wrap=tk.WORD)
+        output_box.grid(row=1, column=4)
+        return output_box
 
     def generate_paragraph_button(self):
         """
 
         :return:
         """
+        tk.Button(self.master, text='Generate Paragraph',
+                  command=self.run_content_generator_backend).grid(row=3,
+                                                                   column=1,
+                                                                   sticky=tk.W,
+                                                                   pady=4)
 
-        self.gen_para = tk.Button(self, text="Generate Paragraph!", fg="black",
-                                  command=self.get_keywords())
-        # self.gen_para.pack(side="bottom")
-        self.gen_para.grid(column=1, row=8)
+    def run_content_generator_backend(self):
+        """
+        The run_content_generator_backend function runs the backend
+        parts for the content generator. This includes grabbing the user's
+        input and placing it into the FindText class which returns a
+        paragraph if found.
+        :return:
+        """
+
+        # This SO page helped me figure out how to get text out of the entry
+        # boxes when using classes:
+        # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get-function-returning-nothing
+
+        # 1st delete any content left over in output box
+        self.output_text.delete('1.0', tk.END)
+
+        print("Primary Word: %s\nSecondary Word: %s" % (self.primary.get(),
+                                                        self.secondary.get()))
+
+        primary_keyword = self.primary.get()
+        secondary_keyword = self.secondary.get()
+
+        # Instantiate a findText object
+        f = FindText()
+
+        # Send http request to Wikipedia
+        wiki_page = f.send_http_request(primary_keyword)
+
+        # Parse Wiki text
+        text_grab = f.parse_wikipedia_page_text(wiki_page)
+
+        # Clean text
+        clean_text = f.clean_text(text_grab)
+
+        # Find the paragraph with both primary and secondary keywords!
+        paragraph_found = f.find_paragraph(clean_text, primary_keyword,
+                                           secondary_keyword)
+
+        # Insert into text box
+        self.output_text.insert('1.0', paragraph_found)
+
+        # Write output to a csv
+        # https://realpython.com/python-csv/
+        with open('output2.csv', mode='w') as output_file:
+            output_writer = csv.writer(output_file, delimiter=',',
+                                       quotechar='"',
+                                       quoting=csv.QUOTE_MINIMAL)
+
+            output_writer.writerow(['input_keywords', 'output_content'])
+            output_writer.writerow(
+                [primary_keyword + ';' + secondary_keyword,
+                 paragraph_found])
+
+        # Clear input
+        self.primary.delete(0, tk.END)
+        self.secondary.delete(0, tk.END)
 
 
 class FindText:
@@ -211,6 +208,8 @@ class FindText:
             words = list_of_lines[i]
             words_list = words.split()
 
+            # If both the primary and secondary keyword are in the list mark
+            # the paragraph as found (aka keep it)
             if secondary_keyword.lower() in words_list and \
                     primary_keyword.lower() in words_list:
                 # see if one of the words in the sentence is the word we want
@@ -230,74 +229,74 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 1:
 
-        def show_entry_fields():
-            # 1st delete any content left over in output box
-            e3.delete('1.0', tk.END)
+        # def show_entry_fields():
+        #     # 1st delete any content left over in output box
+        #     e3.delete('1.0', tk.END)
+        #
+        #     print("Primary Word: %s\nSecondary Word: %s" % (e1.get(),
+        #                                                     e2.get()))
+        #
+        #     primary_keyword = e1.get()
+        #     secondary_keyword = e2.get()
+        #
+        #     # Instantiate a findText object
+        #     f = FindText()
+        #
+        #     # Send http request to Wikipedia
+        #     wiki_page = f.send_http_request(primary_keyword)
+        #
+        #     # Parse Wiki text
+        #     text_grab = f.parse_wikipedia_page_text(wiki_page)
+        #
+        #     # Clean text
+        #     clean_text = f.clean_text(text_grab)
+        #
+        #     # Find the paragraph with both primary and secondary keywords!
+        #     paragraph_found = f.find_paragraph(clean_text, primary_keyword,
+        #                                        secondary_keyword)
+        #
+        #     # Insert into text box
+        #     e3.insert('1.0', paragraph_found)
+        #
+        #     # Write output to a csv
+        #     # https://realpython.com/python-csv/
+        #     with open('output2.csv', mode='w') as output_file:
+        #         output_writer = csv.writer(output_file, delimiter=',',
+        #                                    quotechar='"',
+        #                                    quoting=csv.QUOTE_MINIMAL)
+        #
+        #         output_writer.writerow(['input_keywords', 'output_content'])
+        #         output_writer.writerow(
+        #             [primary_keyword + ';' + secondary_keyword,
+        #              paragraph_found])
+        #
+        #     # Clear input
+        #     e1.delete(0, tk.END)
+        #     e2.delete(0, tk.END)
 
-            print("Primary Word: %s\nSecondary Word: %s" % (e1.get(),
-                                                            e2.get()))
+        root = tk.Tk()
+        root.title("Content Generator")
+        root.geometry('1000x500')
+        tk.Label(root, text="Welcome to the Content Generator! Please "
+                            "place your search terms in the boxes "
+                            "below.").grid(row=0, column=3)
+        # tk.Label(master, text="Primary Word").grid(row=1)
+        # tk.Label(master, text="Secondary Word").grid(row=2)
 
-            primary_keyword = e1.get()
-            secondary_keyword = e2.get()
+        # e1 = tk.Entry(master)
+        # e2 = tk.Entry(master)
+        # e3 = tk.Text(master, height=50, width=50, wrap=tk.WORD)
+        #
+        # e1.grid(row=1, column=1)
+        # e2.grid(row=2, column=1)
+        # e3.grid(row=1, column=4)
+        #
+        # tk.Button(master,
+        #           text='Generate Paragraph', command=show_entry_fields).grid(
+        #     row=3, column=1, sticky=tk.W, pady=4)
 
-            # Instantiate a findText object
-            f = FindText()
-
-            # Send http request to Wikipedia
-            wiki_page = f.send_http_request(primary_keyword)
-
-            # Parse Wiki text
-            text_grab = f.parse_wikipedia_page_text(wiki_page)
-
-            # Clean text
-            clean_text = f.clean_text(text_grab)
-
-            # Find the paragraph with both primary and secondary keywords!
-            paragraph_found = f.find_paragraph(clean_text, primary_keyword,
-                                               secondary_keyword)
-
-            # Insert into text box
-            e3.insert('1.0', paragraph_found)
-
-            # Write output to a csv
-            # https://realpython.com/python-csv/
-            with open('output2.csv', mode='w') as output_file:
-                output_writer = csv.writer(output_file, delimiter=',',
-                                           quotechar='"',
-                                           quoting=csv.QUOTE_MINIMAL)
-
-                output_writer.writerow(['input_keywords', 'output_content'])
-                output_writer.writerow(
-                    [primary_keyword + ';' + secondary_keyword,
-                     paragraph_found])
-
-            # Clear input
-            e1.delete(0, tk.END)
-            e2.delete(0, tk.END)
-
-        master = tk.Tk()
-        master.title("Content Generator")
-        master.geometry('600x800')
-        tk.Label(master, text="Welcome to the Content Generator! Please "
-                              "place your search terms in the boxes "
-                              "below.").grid(row=0, column=3)
-        tk.Label(master, text="Primary Word").grid(row=1)
-        tk.Label(master, text="Secondary Word").grid(row=2)
-
-        e1 = tk.Entry(master)
-        e2 = tk.Entry(master)
-        e3 = tk.Text(master, height=50, width=50, wrap=tk.WORD)
-
-        e1.grid(row=1, column=1)
-        e2.grid(row=2, column=1)
-        e3.grid(row=1, column=5)
-
-        tk.Button(master,
-                  text='Generate Paragraph', command=show_entry_fields).grid(
-            row=3, column=1, sticky=tk.W, pady=4)
-
-
-        master.mainloop()
+        app = ContentGeneratorApp(master=root)
+        app.mainloop()
 
         # root = tk.Tk()
         # root.title("Content Generator")
@@ -344,11 +343,12 @@ if __name__ == "__main__":
         # https://realpython.com/python-csv/
         with open('output.csv', mode='w') as output_file:
             output_writer = csv.writer(output_file, delimiter=',',
-                                         quotechar='"',
-                                         quoting=csv.QUOTE_MINIMAL)
+                                       quotechar='"',
+                                       quoting=csv.QUOTE_MINIMAL)
 
             output_writer.writerow(['input_keywords', 'output_content'])
-            output_writer.writerow([primary_keyword + ';' + secondary_keyword, paragraph_found])
+            output_writer.writerow(
+                [primary_keyword + ';' + secondary_keyword, paragraph_found])
 
     else:
         print("Incorrect Argument(s) Provided. Quitting.")
