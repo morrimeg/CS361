@@ -4,9 +4,12 @@
 ## Project: Content Generator Microservice
 ## Description:
 
+import csv
+import re
+import requests
+import sys
 import tkinter as tk
-from tkinter import ttk
-import csv, sys, re, requests
+
 from bs4 import BeautifulSoup
 
 
@@ -100,18 +103,9 @@ class ContentGeneratorApp(tk.Frame):
         # Instantiate a findText object
         f = FindText()
 
-        # Send http request to Wikipedia
-        wiki_page = f.send_http_request(primary_keyword)
-
-        # Parse Wiki text
-        text_grab = f.parse_wikipedia_page_text(wiki_page)
-
-        # Clean text
-        clean_text = f.clean_text(text_grab)
-
-        # Find the paragraph with both primary and secondary keywords!
-        paragraph_found = f.find_paragraph(clean_text, primary_keyword,
-                                           secondary_keyword)
+        # Run all of the code in FindText in order to find a paragraph if one
+        # exists
+        paragraph_found = f.run_paragraph_finder(primary_keyword, secondary_keyword)
 
         # Insert into text box
         self.output_text.insert('1.0', paragraph_found)
@@ -217,6 +211,28 @@ class FindText:
                 break
 
         return found_paragraph
+
+    def run_paragraph_finder(self, primary_keyword, secondary_keyword):
+        """
+
+        :param primary_keyword:
+        :param secondary_keyword:
+        :return:
+        """
+        # Send http request to Wikipedia
+        wiki_page = self.send_http_request(primary_keyword)
+
+        # Parse Wiki text
+        text_grab = self.parse_wikipedia_page_text(wiki_page)
+
+        # Clean text
+        clean_text = self.clean_text(text_grab)
+
+        # Find the paragraph with both primary and secondary keywords!
+        paragraph_found = self.find_paragraph(clean_text, primary_keyword,
+                                           secondary_keyword)
+
+        return paragraph_found
 
 
 if __name__ == "__main__":
