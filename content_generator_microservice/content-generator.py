@@ -286,7 +286,6 @@ class FindText:
 
         # Clean text
         clean_text = self.clean_text(text_grab)
-        print(clean_text)  # TAKE OUT
 
         # Find the paragraph with both primary and secondary keywords!
         paragraph_found = self.find_paragraph(clean_text, primary_keyword,
