@@ -13,6 +13,7 @@ import csv
 import re
 import requests
 import sys
+import string
 import tkinter as tk
 
 from bs4 import BeautifulSoup
@@ -25,7 +26,6 @@ from bs4 import BeautifulSoup
 # Building a Tkinter App:
 # https://www.python-course.eu/tkinter_entry_widgets.php
 # https://tkdocs.com/tutorial/firstexample.html
-#
 
 # I used the following site to get my code for the GUI:
 # https://www.python-course.eu/tkinter_entry_widgets.php
@@ -191,7 +191,7 @@ class FindText:
         # this page helped me figure the above out:
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
         text = ''
-        for paragraph in parsed_page_content.find_all('p')[3:]:
+        for paragraph in parsed_page_content.find_all('p'):  # [3:]:
             text += paragraph.text
 
         return text
@@ -230,9 +230,22 @@ class FindText:
         # Now we can find the secondary keyword
         # Each paragraph ends with \n. So we need to split each line by \n
         # I found out how to do this from the following SO article:
-        # https://stackoverflow.com/questions/14801057/python-splitting-to-the-newline-character
+        # https://stackoverflow.com/questions/14801057/python-splitting-to-the
+        # -newline-character
         list_of_lines = text.splitlines()
+
+        # When splitting lines, we need to also clean up words that can get
+        # split with punctuation marks (e.g. dog., cat,, etc.). This is
+        # because when we got to search for the word dog != dog. since the
+        # period is attached to the 2nd occurance of dog. I found the below
+        # SO helpful in parsing this out:
+        # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
+        # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
+        text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
+        list_of_line_no_punctuation = text_no_punctuation.splitlines()
+
         found_paragraph = []  # empty list to hold the found paragraph
+
 
         # Now we will iterate through each line, and break up each line word
         # for word to see if the secondary keyword is in a paragraph.
@@ -240,14 +253,16 @@ class FindText:
             # split the sentence into individual words
             # Found this SO helpful:
             # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-sentence-contains-a-certain-word-in-python-and-then-perform
-            words = list_of_lines[i]
+            #words = list_of_lines[i]
+            words = list_of_line_no_punctuation[i]
             words_list = words.split()
 
             # If both the primary and secondary keyword are in the list mark
             # the paragraph as found (aka keep it)
-            if secondary_keyword.lower() in words_list and \
-                    primary_keyword.lower() in words_list:
-                # see if one of the words in the sentence is the word we want
+            if primary_keyword.lower() in words_list and \
+                    secondary_keyword.lower() in words_list:
+
+                # If both words are found, we return the paragraph.
                 found_paragraph = list_of_lines[i]
                 break
 
@@ -271,6 +286,7 @@ class FindText:
 
         # Clean text
         clean_text = self.clean_text(text_grab)
+        print(clean_text)  # TAKE OUT
 
         # Find the paragraph with both primary and secondary keywords!
         paragraph_found = self.find_paragraph(clean_text, primary_keyword,
@@ -344,10 +360,10 @@ if __name__ == "__main__":
         tk.Label(root, text="Welcome to the Content Generator! Please "
                             "place your search terms in the boxes "
                             "below \nin order to find a paragraph.").grid(
-                                                                        row=0,
-                                                                        column=3,
-                                                                        columnspan=5,
-                                                                        sticky=tk.NSEW)
+            row=0,
+            column=3,
+            columnspan=5,
+            sticky=tk.NSEW)
 
         # Call the ContentGeneratorApp class to actually run the app
         app = ContentGeneratorApp(master=root)
