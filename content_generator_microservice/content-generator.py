@@ -1,8 +1,13 @@
-## Name: Megan Morrison
-## Date: Febuary 4, 2021
-## Class: CS 361
-## Project: Content Generator Microservice
-## Description:
+# Name: Megan Morrison
+# Date: Febuary 4, 2021
+# Class: CS 361
+# Project: Content Generator Microservice
+# Description: This file contains the following classes:
+# ContentGeneratorApp, FindText, and CsvManipulation. ContentGeneratorApp
+# creates a desktop app that allows the user to input a primary and
+# secondary search term. The app then searches Wikipedia for the article
+# containing the primary search term and returns a paragraph to the user
+# that contains both the primary and secondary search terms (if one exists).
 
 import csv
 import re
