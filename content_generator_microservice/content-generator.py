@@ -369,7 +369,7 @@ if __name__ == "__main__":
         app.mainloop()
 
     # Else, read in the input file and make the appropriate calls to Wikipedia.
-    elif sys.argv[1] == "input.csv":
+    elif sys.argv[1] == "input2.csv":
 
         # Instantiate an object for the CsvManipulation class
         c = CsvManipulation()
@@ -377,9 +377,15 @@ if __name__ == "__main__":
         # Import the file given
         file_data = c.import_csv(sys.argv[1])
 
-        # Now that we have our words, we need to parse them
-        primary_keyword = file_data[1][0]
-        secondary_keyword = file_data[2][0]
+        # Now that we have our words, we need to parse them. First we need
+        # to split the words in our file_data list by the semicolon.
+        data = file_data[1][0].split(';')
+
+        # Grab primary word in new split list
+        primary_keyword = data[0]
+
+        # Grab secondary word in new split list
+        secondary_keyword = data[1]
 
         # clean up primary_keyword since there is a semicolon
         primary_keyword = re.sub(r';', '', primary_keyword)
