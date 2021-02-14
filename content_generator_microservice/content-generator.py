@@ -245,87 +245,23 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 1:
 
-        # def show_entry_fields():
-        #     # 1st delete any content left over in output box
-        #     e3.delete('1.0', tk.END)
-        #
-        #     print("Primary Word: %s\nSecondary Word: %s" % (e1.get(),
-        #                                                     e2.get()))
-        #
-        #     primary_keyword = e1.get()
-        #     secondary_keyword = e2.get()
-        #
-        #     # Instantiate a findText object
-        #     f = FindText()
-        #
-        #     # Send http request to Wikipedia
-        #     wiki_page = f.send_http_request(primary_keyword)
-        #
-        #     # Parse Wiki text
-        #     text_grab = f.parse_wikipedia_page_text(wiki_page)
-        #
-        #     # Clean text
-        #     clean_text = f.clean_text(text_grab)
-        #
-        #     # Find the paragraph with both primary and secondary keywords!
-        #     paragraph_found = f.find_paragraph(clean_text, primary_keyword,
-        #                                        secondary_keyword)
-        #
-        #     # Insert into text box
-        #     e3.insert('1.0', paragraph_found)
-        #
-        #     # Write output to a csv
-        #     # https://realpython.com/python-csv/
-        #     with open('output2.csv', mode='w') as output_file:
-        #         output_writer = csv.writer(output_file, delimiter=',',
-        #                                    quotechar='"',
-        #                                    quoting=csv.QUOTE_MINIMAL)
-        #
-        #         output_writer.writerow(['input_keywords', 'output_content'])
-        #         output_writer.writerow(
-        #             [primary_keyword + ';' + secondary_keyword,
-        #              paragraph_found])
-        #
-        #     # Clear input
-        #     e1.delete(0, tk.END)
-        #     e2.delete(0, tk.END)
-
+        # Start up the desktop app.
+        # Again, I got this code from the following site:
+        # https://www.python-course.eu/tkinter_entry_widgets.php
         root = tk.Tk()
         root.title("Content Generator")
         root.geometry('1000x500')
         tk.Label(root, text="Welcome to the Content Generator! Please "
                             "place your search terms in the boxes "
                             "below.").grid(row=0, column=3)
-        # tk.Label(master, text="Primary Word").grid(row=1)
-        # tk.Label(master, text="Secondary Word").grid(row=2)
 
-        # e1 = tk.Entry(master)
-        # e2 = tk.Entry(master)
-        # e3 = tk.Text(master, height=50, width=50, wrap=tk.WORD)
-        #
-        # e1.grid(row=1, column=1)
-        # e2.grid(row=2, column=1)
-        # e3.grid(row=1, column=4)
-        #
-        # tk.Button(master,
-        #           text='Generate Paragraph', command=show_entry_fields).grid(
-        #     row=3, column=1, sticky=tk.W, pady=4)
-
+        # Call the ContentGeneratorApp class to actually run the app
         app = ContentGeneratorApp(master=root)
         app.mainloop()
 
-        # root = tk.Tk()
-        # root.title("Content Generator")
-        # root.geometry('800x400')
-        # root = ttk.Frame(root, padding="3 3 12 12")
-        # root.grid(column=0, row=0)
-        # root.columnconfigure(0, weight=1)
-        # root.rowconfigure(0, weight=1)
-        # app = Application(master=root)
-        # app.mainloop()
-
     # Else, read in the input file and make the appropriate calls to Wikipedia.
     elif sys.argv[1] == "input.csv":
+
         # First we will read in the csv
         # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
         with open(sys.argv[1], newline='') as f:
@@ -342,18 +278,9 @@ if __name__ == "__main__":
         # Instantiate a findText object
         f = FindText()
 
-        # Send http request to Wikipedia
-        wiki_page = f.send_http_request(primary_keyword)
-
-        # Parse Wiki text
-        text_grab = f.parse_wikipedia_page_text(wiki_page)
-
-        # Clean text
-        clean_text = f.clean_text(text_grab)
-
         # Find the paragraph with both primary and secondary keywords!
-        paragraph_found = f.find_paragraph(clean_text, primary_keyword,
-                                           secondary_keyword)
+        paragraph_found = f.run_paragraph_finder(primary_keyword,
+                                                 secondary_keyword)
 
         # Write output to a csv
         # https://realpython.com/python-csv/
