@@ -334,6 +334,8 @@ if __name__ == "__main__":
         root.geometry('1000x650')  # initial size of the desktop app
 
         # Welcome message
+        # Used this for learning how to scale widgets:
+        # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
         tk.Label(root, text="Welcome to the Content Generator! Please "
                             "place your search terms in the boxes "
                             "below \nin order to find a paragraph.").grid(
