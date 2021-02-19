@@ -369,7 +369,7 @@ if __name__ == "__main__":
         app.mainloop()
 
     # Else, read in the input file and make the appropriate calls to Wikipedia.
-    elif sys.argv[1] == "input2.csv":
+    elif sys.argv[1] == "input.csv":
 
         # Instantiate an object for the CsvManipulation class
         c = CsvManipulation()
@@ -388,7 +388,7 @@ if __name__ == "__main__":
         secondary_keyword = data[1]
 
         # clean up primary_keyword since there is a semicolon
-        primary_keyword = re.sub(r';', '', primary_keyword)
+        # primary_keyword = re.sub(r';', '', primary_keyword)
 
         # Instantiate a findText object
         f = FindText()
