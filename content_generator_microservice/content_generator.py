@@ -20,8 +20,6 @@ from bs4 import BeautifulSoup
 
 ## TODO: Pickle data & unpickle data here
 ## TODO: Request button to request info from Life Generator
-## TODO: Create data_rec function in Client -- recieve response
-
 
 # References:
 # How to get content from Wikipedia:
@@ -154,7 +152,7 @@ class ContentGeneratorApp(tk.Frame):
 
 class FindText:
     def __init__(self):
-        self.primary_keyword = ""  # variable to hold primary keyword
+        self.primary_keyword = ""    # variable to hold primary keyword
         self.secondary_keyword = ""  # variable to hold secondary keyword
 
     def send_http_request(self, primary_keyword):
@@ -192,7 +190,7 @@ class FindText:
         # -from-wikipedia-in-python-9ce07426579b
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
         text = ''
-        for paragraph in parsed_page_content.find_all('p'):  # [3:]: -- this
+        for paragraph in parsed_page_content.find_all('p'):
             # is code that is no longer used
             text += paragraph.text
 
@@ -256,7 +254,6 @@ class FindText:
             # Found this SO helpful:
             # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
             # sentence-contains-a-certain-word-in-python-and-then-perform
-            #words = list_of_lines[i]
             words = list_of_line_no_punctuation[i]
             words_list = words.split()
 
@@ -388,9 +385,6 @@ if __name__ == "__main__":
 
         # Grab secondary word in new split list
         secondary_keyword = data[1]
-
-        # clean up primary_keyword since there is a semicolon
-        # primary_keyword = re.sub(r';', '', primary_keyword)
 
         # Instantiate a findText object
         f = FindText()
