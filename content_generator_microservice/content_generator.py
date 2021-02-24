@@ -1,5 +1,5 @@
 # Name: Megan Morrison
-# Date: Febuary 4, 2021
+# Date: February 21, 2021
 # Class: CS 361
 # Project: Content Generator Microservice
 # Description: This file contains the following classes:
@@ -13,10 +13,14 @@ import csv
 import re
 import requests
 import sys
-import string
 import tkinter as tk
+from client import micro_client
 
 from bs4 import BeautifulSoup
+
+## TODO: Pickle data & unpickle data here
+## TODO: Request button to request info from Life Generator
+## TODO: Create data_rec function in Client -- recieve response
 
 
 # References:
@@ -186,12 +190,10 @@ class FindText:
         # All of this code is from:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
         # -from-wikipedia-in-python-9ce07426579b
-
-        # bypasses synonyms that are included as a paragraph tag on Wiki
-        # this page helped me figure the above out:
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
         text = ''
-        for paragraph in parsed_page_content.find_all('p'):  # [3:]:
+        for paragraph in parsed_page_content.find_all('p'):  # [3:]: -- this
+            # is code that is no longer used
             text += paragraph.text
 
         return text
@@ -252,7 +254,8 @@ class FindText:
         for i in range(len(list_of_lines)):
             # split the sentence into individual words
             # Found this SO helpful:
-            # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-sentence-contains-a-certain-word-in-python-and-then-perform
+            # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
+            # sentence-contains-a-certain-word-in-python-and-then-perform
             #words = list_of_lines[i]
             words = list_of_line_no_punctuation[i]
             words_list = words.split()
@@ -305,7 +308,7 @@ class CsvManipulation:
         The import_csv function takes in a filename and imports the csv to a
         list. It returns the list of data in the csv.
         :param filename:
-        :return:
+        :return: data
         """
         # First we will read in the csv
         # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
@@ -325,7 +328,7 @@ class CsvManipulation:
         :param first_word:
         :param second_word:
         :param paragraph:
-        :return:
+        :return: Nothing
         """
         # Write output to a csv
         # https://realpython.com/python-csv/
@@ -337,8 +340,7 @@ class CsvManipulation:
             output_writer.writerow(['input_keywords', 'output_content'])
 
             # Write content row
-            output_writer.writerow(
-                [first_word + ';' + second_word, paragraph])
+            output_writer.writerow([first_word + ';' + second_word, paragraph])
 
 
 if __name__ == "__main__":
