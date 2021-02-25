@@ -46,9 +46,8 @@ class ContentGeneratorApp(tk.Frame):
         """
         The create_labels function creates text labels that are placed next
         to each text entry box
-        :return:
+        :return: None
         """
-        # Create labels for the text entry boxes
         tk.Label(self.master, text="Primary Word (e.g. Dog)").grid(row=2)
         tk.Label(self.master, text="Secondary Word (e.g Breed)").grid(row=3)
 
@@ -56,29 +55,25 @@ class ContentGeneratorApp(tk.Frame):
         """
         The create_primary_keyword_entry_box creates the box that the user
         will put their 1st search term in.
-        :return: primary_entry:
+        :return: primary_entry_box:
         """
-        # Creates text entry box
-        primary_entry = tk.Entry(self.master)
+        primary_entry_box = tk.Entry(self.master)
 
-        # Place box on grid layout
-        primary_entry.grid(row=2, column=1, sticky=tk.W, pady=2)
+        primary_entry_box.grid(row=2, column=1, sticky=tk.W, pady=2)
 
-        return primary_entry
+        return primary_entry_box
 
     def create_secondary_keyword_entry_box(self):
         """
         The create_secondary_keyword_entry_box creates the box that users
         will put their 2nd search term in.
-        :return: secondary_entry:
+        :return: secondary_entry_box:
         """
-        # Creates text entry box
-        secondary_entry = tk.Entry(self.master)
+        secondary_entry_box = tk.Entry(self.master)
 
-        # Place box on grid
-        secondary_entry.grid(row=3, column=1, sticky=tk.W)
+        secondary_entry_box.grid(row=3, column=1, sticky=tk.W)
 
-        return secondary_entry
+        return secondary_entry_box
 
     def create_text_output_box(self):
         """
@@ -86,10 +81,8 @@ class ContentGeneratorApp(tk.Frame):
         output will go into.
         :return: output_box:
         """
-        # Create the output box for the returned paragraph
         output_box = tk.Text(self.master, height=40, width=40, wrap=tk.WORD)
 
-        # Place output box on grid
         output_box.grid(row=2, column=3, columnspan=4, rowspan=4,
                         sticky=tk.E)
 
@@ -101,8 +94,6 @@ class ContentGeneratorApp(tk.Frame):
         generate a paragraph of text after the search terms have been entered.
         :return:
         """
-        # Create a button, and set it to run_content_generator_backend when
-        # clicked.
         tk.Button(self.master, text='Generate Paragraph',
                   command=self.run_content_generator_backend).grid(row=4,
                                                                    column=1,
@@ -121,10 +112,8 @@ class ContentGeneratorApp(tk.Frame):
         # boxes when using classes:
         # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get-function-returning-nothing
 
-        # 1st delete any content left over in output box
         self.output_text.delete('1.0', tk.END)
 
-        # Grab the keywords that were entered into the text entry boxes
         primary_keyword = self.primary.get()
         secondary_keyword = self.secondary.get()
 
@@ -135,17 +124,13 @@ class ContentGeneratorApp(tk.Frame):
         # exists
         paragraph_found = f.run_paragraph_finder(primary_keyword,
                                                  secondary_keyword)
-
-        # Insert into text box
         self.output_text.insert('1.0', paragraph_found)
 
         c = CsvManipulation()  # Instantiate a CsvManipulation object
 
-        # Write output to a csv
         c.export_csv('output.csv', primary_keyword, secondary_keyword,
                      paragraph_found)
 
-        # Clear input
         self.primary.delete(0, tk.END)
         self.secondary.delete(0, tk.END)
 
@@ -166,14 +151,12 @@ class FindText:
         # All of this code is from:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
         # -from-wikipedia-in-python-9ce07426579b
+        # This code sends a request to Wikipedia and parses the returned page.
 
-        # Send request to Wikipedia page using the primary keyword
         res = requests.get("https://en.wikipedia.org/wiki/" + primary_keyword)
 
-        # Parse request page
         parsed_page_content = BeautifulSoup(res.text, 'html.parser')
 
-        # Return the parsed content of the page
         return parsed_page_content
 
     def parse_wikipedia_page_text(self, parsed_page_content):
@@ -191,7 +174,6 @@ class FindText:
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
         text = ''
         for paragraph in parsed_page_content.find_all('p'):
-            # is code that is no longer used
             text += paragraph.text
 
         return text
@@ -211,7 +193,6 @@ class FindText:
         # Clean up text to get rid of footnote markers
         text = re.sub(r'\[.*?\]+', '', text)
 
-        # lower case everything
         text = text.lower()
 
         return text
@@ -244,8 +225,7 @@ class FindText:
         text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
         list_of_line_no_punctuation = text_no_punctuation.splitlines()
 
-        found_paragraph = []  # empty list to hold the found paragraph
-
+        found_paragraph = []
 
         # Now we will iterate through each line, and break up each line word
         # for word to see if the secondary keyword is in a paragraph.
@@ -262,7 +242,6 @@ class FindText:
             if primary_keyword.lower() in words_list and \
                     secondary_keyword.lower() in words_list:
 
-                # If both words are found, we return the paragraph.
                 found_paragraph = list_of_lines[i]
                 break
 
@@ -278,16 +257,12 @@ class FindText:
         :param secondary_keyword:
         :return paragraph_found:
         """
-        # Send http request to Wikipedia
         wiki_page = self.send_http_request(primary_keyword)
 
-        # Parse Wiki text
         text_grab = self.parse_wikipedia_page_text(wiki_page)
 
-        # Clean text
         clean_text = self.clean_text(text_grab)
 
-        # Find the paragraph with both primary and secondary keywords!
         paragraph_found = self.find_paragraph(clean_text, primary_keyword,
                                               secondary_keyword)
 
@@ -307,7 +282,6 @@ class CsvManipulation:
         :param filename:
         :return: data
         """
-        # First we will read in the csv
         # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
         with open(filename, newline='') as f:
             reader = csv.reader(f)
@@ -327,16 +301,14 @@ class CsvManipulation:
         :param paragraph:
         :return: Nothing
         """
-        # Write output to a csv
-        # https://realpython.com/python-csv/
+        # Source: https://realpython.com/python-csv/
         with open(filename, mode='w') as output_file:
             output_writer = csv.writer(output_file, delimiter=',',
                                        quotechar='"',
                                        quoting=csv.QUOTE_MINIMAL)
-            # Write header row
+
             output_writer.writerow(['input_keywords', 'output_content'])
 
-            # Write content row
             output_writer.writerow([first_word + ';' + second_word, paragraph])
 
 
@@ -352,7 +324,6 @@ if __name__ == "__main__":
         root.title("Content Generator")  # name of the application
         root.geometry('1000x650')  # initial size of the desktop app
 
-        # Welcome message
         # Used this for learning how to scale widgets:
         # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
         tk.Label(root, text="Welcome to the Content Generator! Please "
@@ -363,37 +334,29 @@ if __name__ == "__main__":
             columnspan=5,
             sticky=tk.NSEW)
 
-        # Call the ContentGeneratorApp class to actually run the app
         app = ContentGeneratorApp(master=root)
         app.mainloop()
 
     # Else, read in the input file and make the appropriate calls to Wikipedia.
     elif sys.argv[1] == "input.csv":
 
-        # Instantiate an object for the CsvManipulation class
         c = CsvManipulation()
 
-        # Import the file given
         file_data = c.import_csv(sys.argv[1])
 
         # Now that we have our words, we need to parse them. First we need
         # to split the words in our file_data list by the semicolon.
         data = file_data[1][0].split(';')
 
-        # Grab primary word in new split list
         primary_keyword = data[0]
 
-        # Grab secondary word in new split list
         secondary_keyword = data[1]
 
-        # Instantiate a findText object
         f = FindText()
 
-        # Find the paragraph with both primary and secondary keywords!
         paragraph_found = f.run_paragraph_finder(primary_keyword,
                                                  secondary_keyword)
 
-        # Export to csv. This will export the csv to your current directory
         c.export_csv('output.csv', primary_keyword, secondary_keyword,
                      paragraph_found)
 
