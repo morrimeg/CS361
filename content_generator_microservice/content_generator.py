@@ -14,12 +14,10 @@ import re
 import requests
 import sys
 import tkinter as tk
+import threading
+from server import micro_server
 from client import micro_client
-
 from bs4 import BeautifulSoup
-
-## TODO: Pickle data & unpickle data here
-## TODO: Request button to request info from Life Generator
 
 # References:
 # How to get content from Wikipedia:
@@ -41,6 +39,7 @@ class ContentGeneratorApp(tk.Frame):
         self.secondary = self.create_secondary_keyword_entry_box()
         self.output_text = self.create_text_output_box()
         self.generate_paragraph_button()
+        self.request_data_button()
 
     def create_labels(self):
         """
@@ -94,11 +93,64 @@ class ContentGeneratorApp(tk.Frame):
                                                                    column=1,
                                                                    sticky=tk.W,
                                                                    pady=2)
-
-    def run_content_generator_backend(self):
+    def request_data_button(self):
         """
-        Runs the entire content generator program.
-        :return None:
+        :return:
+        """
+        tk.Button(self.master, text='Request Life\n Generator Data',
+                  command=self.get_life_generator_input).grid(row=5, column=1)
+
+    def start_client(self, message):
+        """"""
+        client = micro_client('LIFE_GEN')  # create a life generator
+        client.send_message(message)
+        client.wait_for_response()
+        response_length = client.get_response_length()
+        client_data = client.get_response_data(response_length)
+        return client_data
+
+    # not sure if this will be used
+    def send_data_request_from_client(self, client, data):
+        """
+        :return:
+        """
+        client.send_message(data)
+
+    def receive_data_from_client(self, client):
+        """"""
+
+
+    def start_server(self):
+        """
+        :return:
+        """
+        server = micro_server(self.server_callback, "CONT_GEN")
+        run_server_thread = threading.Thread(target=server.start_listening)
+        run_server_thread.start()
+        server.start_listening()
+
+    def server_callback(self, request):
+        print(f"The request was: {request}")
+        return "Hello Client!"
+
+    def get_life_generator_input(self):
+        """
+
+        :return:
+        """
+        # Get data back from Client
+        #self.start_server()
+        client_data = self.start_client('Hello!')
+        #self.send_data_request_from_client(client, "Hello!")
+        #server_data = self.server_callback()
+        #print(server_data)
+        return client_data
+
+    def get_content_generator_input(self):
+        """
+        Gets input from content generator GUI and returns two string variables
+        :return primary_keyword:
+        :return secondary_keyword:
         """
         # This SO page helped me figure out how to get text out of the entry
         # boxes when using classes:
@@ -109,22 +161,60 @@ class ContentGeneratorApp(tk.Frame):
         primary_keyword = self.primary.get()
         secondary_keyword = self.secondary.get()
 
-        # Instantiate a findText object
+        return primary_keyword, secondary_keyword
+
+    def get_wikipedida_text(self, primary_keyword, secondary_keyword):
+        """
+        Takes in two string variables and returns a string variable.
+        :param primary_keyword:
+        :param secondary_keyword:
+        :return:
+        """
+
         f = FindText()
 
-        # Run all of the code in FindText in order to find a paragraph if one
-        # exists
-        paragraph_found = f.run_paragraph_finder(primary_keyword,
-                                                 secondary_keyword)
+        paragraph_found = f.run_paragraph_finder(primary_keyword,secondary_keyword)
+
         self.output_text.insert('1.0', paragraph_found)
 
-        c = CsvManipulation()  # Instantiate a CsvManipulation object
+        return paragraph_found
 
-        c.export_csv('output.csv', primary_keyword, secondary_keyword,
-                     paragraph_found)
+    def output_content_generator_results(self, primary_keyword,
+                                         secondary_keyword, paragraph_found):
+        """
+        Takes in 3 string variables and exports data.
+        :param primary_keyword:
+        :param secondary_keyword:
+        :param paragraph_found:
+        :return:
+        """
 
+        c = CsvManipulation()
+
+        c.export_csv('output.csv', primary_keyword, secondary_keyword,paragraph_found)
+
+    def clear_content_generator_input(self):
+        """
+        Clears entry text boxes in GUI.
+        :return:
+        """
         self.primary.delete(0, tk.END)
         self.secondary.delete(0, tk.END)
+
+    def run_content_generator_backend(self):
+        """
+        Runs the entire content generator program.
+        :return None:
+        """
+
+        primary_keyword, secondary_keyword = self.get_content_generator_input()
+
+        paragraph_found = self.get_wikipedida_text(primary_keyword, secondary_keyword)
+
+        self.output_content_generator_results(primary_keyword,
+                                              secondary_keyword, paragraph_found)
+
+        self.clear_content_generator_input()
 
 
 class FindText:
@@ -184,6 +274,65 @@ class FindText:
 
         return text
 
+    def split_paragraph_text_into_lines(self, text):
+        """
+        Takes in a string variable and returns two lists of strings.
+        :param text:
+        :return:
+        """
+        # We need to split each line by \n.
+        # I found out how to do this from the following SO article:
+        # https://stackoverflow.com/questions/14801057/python-splitting-to-the
+        # -newline-character
+        list_of_lines = text.splitlines()
+
+        return list_of_lines
+
+    def remove_punctionation_and_split_into_list_of_lines(self, text):
+        """
+        Takes in a string and returns a list of strings
+        :param text:
+        :return:
+        """
+        # Make sure punctuation marks don't get attached to words. (e.g.'dog.', 'cat,')
+        # I found the below SO helpful in parsing this out:
+        # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
+        # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
+        text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
+
+        list_of_line_no_punctuation = text_no_punctuation.splitlines()
+
+        return list_of_line_no_punctuation
+
+    def split_lines_into_words(self,list_of_lines_no_punctuation, index, text):
+        """
+        Takes in a list of strings and returns a list of strings
+        :param list_of_lines:
+        :return:
+        """
+        # split the sentence into individual words
+        # Found this SO helpful:
+        # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
+        # sentence-contains-a-certain-word-in-python-and-then-perform
+        words = list_of_lines_no_punctuation[index]
+        words_list = words.split()
+        return words_list
+
+    def do_primary_and_secondary_words_exist_in_text(self, primary_keyword,
+                                                     secondary_keyword, text):
+        """
+
+        :param primary_keyword:
+        :param secondary_keyword:
+        :param text:
+        :return:
+        """
+        index = 0
+        list_of_lines = self.split_paragraph_text_into_lines(text)
+        words_list = self.split_lines_into_words(list_of_lines, index)
+        if primary_keyword.lower() in words_list and secondary_keyword.lower() in words_list:
+            return True
+
     def find_paragraph(self, text, primary_keyword, secondary_keyword):
         """
         Takes in three string arguements, finds the text in a paragraph,
@@ -193,33 +342,37 @@ class FindText:
         :param secondary_keyword
         :return found_paragraph:
         """
-        # We need to split each line by \n.
-        # I found out how to do this from the following SO article:
-        # https://stackoverflow.com/questions/14801057/python-splitting-to-the
-        # -newline-character
-        list_of_lines = text.splitlines()
+        # # We need to split each line by \n.
+        # # I found out how to do this from the following SO article:
+        # # https://stackoverflow.com/questions/14801057/python-splitting-to-the
+        # # -newline-character
+        # list_of_lines = text.splitlines()
+        #
+        # # Make sure punctuation marks don't get attached to words. (e.g.
+        # # 'dog.', 'cat,')
+        # # I found the below SO helpful in parsing this out:
+        # # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
+        # # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
+        # text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
+        # list_of_line_no_punctuation = text_no_punctuation.splitlines()
 
-        # Make sure punctuation marks don't get attached to words. (e.g.
-        # 'dog.', 'cat,')
-        # I found the below SO helpful in parsing this out:
-        # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
-        # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
-        text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
-        list_of_line_no_punctuation = text_no_punctuation.splitlines()
+        list_of_lines = self.split_paragraph_text_into_lines(text)
+        list_of_lines_no_punctuation = \
+            self.remove_punctionation_and_split_into_list_of_lines(text)
+        #words = self.split_lines_into_words(index, text)
 
         found_paragraph = []
 
         for i in range(len(list_of_lines)):
-            # split the sentence into individual words
-            # Found this SO helpful:
-            # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
-            # sentence-contains-a-certain-word-in-python-and-then-perform
-            words = list_of_line_no_punctuation[i]
+            # # split the sentence into individual words
+            # # Found this SO helpful:
+            # # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
+            # # sentence-contains-a-certain-word-in-python-and-then-perform
+            words = list_of_lines_no_punctuation[i]
             words_list = words.split()
 
             if primary_keyword.lower() in words_list and \
                     secondary_keyword.lower() in words_list:
-
                 found_paragraph = list_of_lines[i]
                 break
 
@@ -307,6 +460,7 @@ if __name__ == "__main__":
 
         app = ContentGeneratorApp(master=root)
         app.mainloop()
+        app.start_server()  # start the server for socket communication
 
     # Else, read in the input file.
     elif sys.argv[1] == "input.csv":
