@@ -100,48 +100,62 @@ class ContentGeneratorApp(tk.Frame):
         tk.Button(self.master, text='Request Life\n Generator Data',
                   command=self.get_life_generator_input).grid(row=5, column=1)
 
-    def start_client(self, message):
+    def start_life_generator_client(self, message):
         """"""
         client = micro_client('LIFE_GEN')  # create a life generator
         response = client.send_message(message)
         print(response)
         return response
 
-    # not sure if this will be used
-    def send_data_request_from_client(self, client, data):
-        """
-        :return:
-        """
-        client.send_message(data)
-
-    def receive_data_from_client(self, client):
+    def start_content_generator_client(self):
         """"""
+        client = micro_client('CONT_GEN')  # create a life generator
+        #response = client.send_message(message)
+        #print(response)
+        return client
 
-
-    def start_server(self):
+    def start_content_generator_server(self):
         """
         :return:
         """
-        server = micro_server(self.server_callback, "CONT_GEN")
+        server = micro_server(self.content_generator_server_callback, "CONT_GEN")
         run_server_thread = threading.Thread(target=server.start_listening)
         run_server_thread.start()
-        server.start_listening()
 
-    def server_callback(self, request):
+    def content_generator_server_callback(self, request):
         print(f"The request was: {request}")
-        return "Hello Client!"
+        #content_client = self.start_content_generator_client()
+        #    input_for_life_gen = self.get_life_generator_input()
+
+        return "Got it!"
 
     def get_life_generator_input(self):
         """
-
         :return:
         """
         # Get data back from Client
-        client_data = self.start_client('Hello!')
-        #self.send_data_request_from_client(client, "Hello!")
-        #server_data = self.server_callback()
-        #print(server_data)
-        return client_data
+        client_data = self.start_life_generator_client('Give me some life!')
+
+        if len(client_data) == 0:
+            paragraph_found = 'We could not find a paragraph with this request.'
+
+        else:
+            # Split the words in our file_data list by the semicolon
+            data = client_data.split(';')
+
+            primary_keyword = data[0]
+            secondary_keyword = data[1].split()[0]
+
+            paragraph_found = self.get_wikipedida_text(primary_keyword,
+                                                   secondary_keyword)
+
+            self.output_content_generator_results(primary_keyword,
+                                              secondary_keyword,
+                                              paragraph_found)
+
+        # self.content_generator_server_callback(paragraph_found)
+        print(paragraph_found)  # for testing
+        return paragraph_found
 
     def get_content_generator_input(self):
         """
@@ -434,6 +448,7 @@ class CsvManipulation:
             output_writer.writerow([first_word + ';' + second_word, paragraph])
 
 
+
 if __name__ == "__main__":
     # If there is only one argument in the command prompt run the GUI.
     if len(sys.argv) == 1:
@@ -456,8 +471,8 @@ if __name__ == "__main__":
             sticky=tk.NSEW)
 
         app = ContentGeneratorApp(master=root)
+        app.start_content_generator_server()
         app.mainloop()
-        app.start_server()  # start the server for socket communication
 
     # Else, read in the input file.
     elif sys.argv[1] == "input.csv":
@@ -485,3 +500,13 @@ if __name__ == "__main__":
     else:
         print("Incorrect Argument(s) Provided. Quitting.")
         exit()
+
+
+# This is how the program is gonna work
+# 1. Open both programs
+# 2. In Content Generator click request button
+# 3. Request made & data sent back
+# 4. Content gen runs paragraph finder & stores paragraph
+# 5. Go into Life Generator & click request button
+# 6. Content gen sends back stored paragraph
+# 5. Life Gen displays paragraph data.
