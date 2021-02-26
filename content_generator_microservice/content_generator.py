@@ -103,11 +103,9 @@ class ContentGeneratorApp(tk.Frame):
     def start_client(self, message):
         """"""
         client = micro_client('LIFE_GEN')  # create a life generator
-        client.send_message(message)
-        client.wait_for_response()
-        response_length = client.get_response_length()
-        client_data = client.get_response_data(response_length)
-        return client_data
+        response = client.send_message(message)
+        print(response)
+        return response
 
     # not sure if this will be used
     def send_data_request_from_client(self, client, data):
@@ -139,7 +137,6 @@ class ContentGeneratorApp(tk.Frame):
         :return:
         """
         # Get data back from Client
-        #self.start_server()
         client_data = self.start_client('Hello!')
         #self.send_data_request_from_client(client, "Hello!")
         #server_data = self.server_callback()
