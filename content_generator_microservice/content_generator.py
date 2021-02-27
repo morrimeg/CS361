@@ -105,7 +105,7 @@ class ContentGeneratorApp(tk.Frame):
         """"""
         client = micro_client('LIFE_GEN')  # create a life generator
         response = client.send_message(message)
-        print(response)
+        print(response) # Take out!!
         return response
 
     def start_content_generator_server(self):
@@ -159,13 +159,11 @@ class ContentGeneratorApp(tk.Frame):
 
     def return_data_to_life_generator(self):
         """"""
-        paragraph = self.get_returned_paragraph()
-
-        if len(paragraph) == 0:
-            paragraph = "I couldn't find a paragraph with " \
+        if len(self.get_returned_paragraph()) == 0:
+            self.paragraph_found = "I couldn't find a paragraph with " \
                                           "these terms."
 
-        return paragraph
+        return self.get_returned_paragraph()
 
     def get_content_generator_input(self):
         """
