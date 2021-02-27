@@ -40,6 +40,7 @@ class ContentGeneratorApp(tk.Frame):
         self.output_text = self.create_text_output_box()
         self.generate_paragraph_button()
         self.request_data_button()
+        self.paragraph_found = ''
 
     def create_labels(self):
         """
@@ -107,13 +108,6 @@ class ContentGeneratorApp(tk.Frame):
         print(response)
         return response
 
-    def start_content_generator_client(self):
-        """"""
-        client = micro_client('CONT_GEN')  # create a life generator
-        #response = client.send_message(message)
-        #print(response)
-        return client
-
     def start_content_generator_server(self):
         """
         :return:
@@ -124,10 +118,11 @@ class ContentGeneratorApp(tk.Frame):
 
     def content_generator_server_callback(self, request):
         print(f"The request was: {request}")
-        #content_client = self.start_content_generator_client()
-        #    input_for_life_gen = self.get_life_generator_input()
 
-        return "Got it!"
+        content_generator_paragraph = self.return_data_to_life_generator()
+        print("callback from content gen server") #TAKE OUT
+
+        return content_generator_paragraph
 
     def get_life_generator_input(self):
         """
@@ -135,27 +130,42 @@ class ContentGeneratorApp(tk.Frame):
         """
         # Get data back from Client
         client_data = self.start_life_generator_client('Give me some life!')
+        print("client data rec ", client_data)  # TAKE OUT
 
-        if len(client_data) == 0:
-            paragraph_found = 'We could not find a paragraph with this request.'
+        primary_keyword, secondary_keyword = FindText().parse_incoming_data(
+            client_data)
 
-        else:
-            # Split the words in our file_data list by the semicolon
-            data = client_data.split(';')
+        self.paragraph_found = self.get_paragraph_from_socket_keywords(
+            primary_keyword, secondary_keyword)
 
-            primary_keyword = data[0]
-            secondary_keyword = data[1].split()[0]
+        content_gen_paragraph = self.return_data_to_life_generator()
 
-            paragraph_found = self.get_wikipedida_text(primary_keyword,
+        self.output_content_generator_results(primary_keyword,
+                                              secondary_keyword,
+                                              content_gen_paragraph)
+
+    def get_paragraph_from_socket_keywords(self, primary_keyword,
+                                           secondary_keyword):
+        """"""
+        self.paragraph_found = self.get_wikipedida_text(primary_keyword,
                                                    secondary_keyword)
 
-            self.output_content_generator_results(primary_keyword,
-                                              secondary_keyword,
-                                              paragraph_found)
+        print(self.paragraph_found) # TAKE OUT
 
-        # self.content_generator_server_callback(paragraph_found)
-        print(paragraph_found)  # for testing
-        return paragraph_found
+        return self.paragraph_found
+
+    def get_returned_paragraph(self):
+        return self.paragraph_found
+
+    def return_data_to_life_generator(self):
+        """"""
+        paragraph = self.get_returned_paragraph()
+
+        if len(paragraph) == 0:
+            paragraph = "I couldn't find a paragraph with " \
+                                          "these terms."
+
+        return paragraph
 
     def get_content_generator_input(self):
         """
@@ -184,14 +194,16 @@ class ContentGeneratorApp(tk.Frame):
 
         f = FindText()
 
-        paragraph_found = f.run_paragraph_finder(primary_keyword,secondary_keyword)
+        self.paragraph_found = f.run_paragraph_finder(primary_keyword,
+                                                  secondary_keyword)
 
-        self.output_text.insert('1.0', paragraph_found)
+        self.output_text.insert('1.0', self.paragraph_found)
 
-        return paragraph_found
+        return self.paragraph_found
 
     def output_content_generator_results(self, primary_keyword,
-                                         secondary_keyword, paragraph_found):
+                                         secondary_keyword,
+                                         paragraph):
         """
         Takes in 3 string variables and exports data.
         :param primary_keyword:
@@ -202,7 +214,8 @@ class ContentGeneratorApp(tk.Frame):
 
         c = CsvManipulation()
 
-        c.export_csv('output.csv', primary_keyword, secondary_keyword,paragraph_found)
+        c.export_csv('output.csv', primary_keyword, secondary_keyword, self.
+                     paragraph_found)
 
     def clear_content_generator_input(self):
         """
@@ -220,10 +233,12 @@ class ContentGeneratorApp(tk.Frame):
 
         primary_keyword, secondary_keyword = self.get_content_generator_input()
 
-        paragraph_found = self.get_wikipedida_text(primary_keyword, secondary_keyword)
+        self.paragraph_found = self.get_wikipedida_text(primary_keyword,
+                                                    secondary_keyword)
 
         self.output_content_generator_results(primary_keyword,
-                                              secondary_keyword, paragraph_found)
+                                              secondary_keyword,
+                                              self.paragraph_found)
 
         self.clear_content_generator_input()
 
@@ -407,6 +422,17 @@ class FindText:
                                               secondary_keyword)
 
         return paragraph_found
+
+    def parse_incoming_data(self, input_data):
+        """Parses data from csv or sockets. Taks in a string and returns two
+        string variables"""
+        # Split the words in our file_data list by the semicolon
+        data = input_data.split(';')
+
+        primary_keyword = data[0]
+        secondary_keyword = data[1].split()[0]
+
+        return primary_keyword, secondary_keyword
 
 
 class CsvManipulation:
