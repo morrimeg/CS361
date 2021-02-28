@@ -112,7 +112,7 @@ class ContentGeneratorApp(tk.Frame):
         # are similar since we developed the sockets together.
         client = micro_client('LIFE_GEN')  # create a life generator
         response = client.send_message(message)
-        print(response) # Take out!!
+        print(response)
         return response
 
     def start_content_generator_server(self):
@@ -185,9 +185,9 @@ class ContentGeneratorApp(tk.Frame):
         :return:
         """
 
-        f = FindText()
+        find_text_object = FindText()
 
-        self.paragraph_found = f.run_paragraph_finder(primary_keyword,
+        self.paragraph_found = find_text_object.run_paragraph_finder(primary_keyword,
                                                   secondary_keyword)
 
         self.output_text.insert('1.0', self.paragraph_found)
@@ -205,9 +205,9 @@ class ContentGeneratorApp(tk.Frame):
         :return:
         """
 
-        c = CsvManipulation()
+        csv_object = CsvManipulation()
 
-        c.export_csv('output.csv', primary_keyword, secondary_keyword, self.
+        csv_object.export_csv('output.csv', primary_keyword, secondary_keyword, self.
                      paragraph_found)
 
     def clear_content_generator_input(self):
@@ -270,13 +270,13 @@ class FindText:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
         # -from-wikipedia-in-python-9ce07426579b
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
-        text = ''
+        parsed_wiki_text = ''
         for paragraph in parsed_page_content.find_all('p'):
-            text += paragraph.text
+            parsed_wiki_text += paragraph.text
 
-        return text
+        return parsed_wiki_text
 
-    def clean_text(self, text):
+    def clean_text(self, parsed_text):
         """
         Takes in a string of text, cleans it, and returns a string of text.
         :param text:
@@ -287,13 +287,13 @@ class FindText:
         # -from-wikipedia-in-python-9ce07426579b
 
         # Clean up text to get rid of footnote markers
-        text = re.sub(r'\[.*?\]+', '', text)
+        parsed_text = re.sub(r'\[.*?\]+', '', parsed_text)
 
-        text = text.lower()
+        parsed_text_cleaned = parsed_text.lower()
 
-        return text
+        return parsed_text_cleaned
 
-    def split_paragraph_text_into_lines(self, text):
+    def split_paragraph_text_into_lines(self, cleaned_wiki_text):
         """
         Takes in a string variable and returns two lists of strings.
         :param text:
@@ -303,11 +303,12 @@ class FindText:
         # I found out how to do this from the following SO article:
         # https://stackoverflow.com/questions/14801057/python-splitting-to-the
         # -newline-character
-        list_of_lines = text.splitlines()
+        list_of_lines = cleaned_wiki_text.splitlines()
 
         return list_of_lines
 
-    def remove_punctionation_and_split_into_list_of_lines(self, text):
+    def remove_punctionation_and_split_into_list_of_lines(self,
+                                                          cleaned_wiki_text):
         """
         Takes in a string and returns a list of strings
         :param text:
@@ -317,14 +318,13 @@ class FindText:
         # I found the below SO helpful in parsing this out:
         # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
         # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
-        text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
+        text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', cleaned_wiki_text)
 
         list_of_line_no_punctuation = text_no_punctuation.splitlines()
 
         return list_of_line_no_punctuation
 
-    def split_lines_into_words(self, list_of_lines_no_punctuation, index,
-                               text):
+    def split_lines_into_words(self, list_of_lines_no_punctuation, index):
         """
         Takes in a list of strings and returns a list of strings
         :param list_of_lines:
@@ -408,9 +408,9 @@ class FindText:
         """
         wiki_page = self.send_http_request(primary_keyword)
 
-        text_grab = self.parse_wikipedia_page_text(wiki_page)
+        wikipedia_text = self.parse_wikipedia_page_text(wiki_page)
 
-        clean_text = self.clean_text(text_grab)
+        clean_text = self.clean_text(wikipedia_text)
 
         paragraph_found = self.find_paragraph(clean_text, primary_keyword,
                                               secondary_keyword)
@@ -455,7 +455,8 @@ class CsvManipulation:
         :param filename:
         :return: data
         """
-        # Found this SO helpful: https://stackoverflow.com/questions/24662571/python-import-csv-to-list
+        # Found this SO helpful: https://stackoverflow.com/questions/24662571/
+        # python-import-csv-to-list
         with open(filename, newline='') as f:
             reader = csv.reader(f)
             data = list(reader)
@@ -511,19 +512,19 @@ if __name__ == "__main__":
     # Else, read in the input file.
     elif sys.argv[1] == "input.csv":
 
-        c = CsvManipulation()
+        csv_object = CsvManipulation()
 
-        file_data = c.import_csv(sys.argv[1])
+        file_data = csv_object.import_csv(sys.argv[1])
 
-        f = FindText()
+        find_text_object = FindText()
 
-        primary_keyword, secondary_keyword = f.parse_incoming_data(
+        primary_keyword, secondary_keyword = find_text_object.parse_incoming_data(
             file_data, 'csv')
 
-        paragraph_found = f.run_paragraph_finder(primary_keyword,
+        paragraph_found = find_text_object.run_paragraph_finder(primary_keyword,
                                                  secondary_keyword)
 
-        c.export_csv('output.csv', primary_keyword, secondary_keyword,
+        csv_object.export_csv('output.csv', primary_keyword, secondary_keyword,
                      paragraph_found)
 
     # Otherwise, if an incorrect argument was input, quit.
