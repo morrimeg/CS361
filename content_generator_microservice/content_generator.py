@@ -136,9 +136,8 @@ class ContentGeneratorApp(tk.Frame):
         if len(self.get_returned_paragraph()) == 0:
             self.paragraph_found = "I couldn't find a paragraph with " \
                                           "these terms."
-        #content_generator_paragraph = self.return_data_to_life_generator()
 
-        return self.paragraph_found #content_generator_paragraph
+        return self.paragraph_found
 
     def get_life_generator_input(self):
         """
@@ -147,36 +146,19 @@ class ContentGeneratorApp(tk.Frame):
         client_data = self.start_life_generator_client('Give me some life!')
 
         primary_keyword, secondary_keyword = FindText().parse_incoming_data(
-            client_data)
+            client_data, 'text')
 
-        self.paragraph_found = self.get_paragraph_from_socket_keywords(
-            primary_keyword, secondary_keyword)
-
-        content_gen_paragraph = self.return_data_to_life_generator()
-
-        self.output_content_generator_results(primary_keyword,
-                                              secondary_keyword,
-                                              content_gen_paragraph)
-
-    def get_paragraph_from_socket_keywords(self, primary_keyword,
-                                           secondary_keyword):
-        """"""
         self.paragraph_found = self.get_wikipedida_text(primary_keyword,
                                                    secondary_keyword)
 
-        return self.paragraph_found
+        self.output_content_generator_results(primary_keyword,
+                                              secondary_keyword,
+                                              self.paragraph_found)
+
 
     def get_returned_paragraph(self):
         """Returns paragraph_found attribute"""
         return self.paragraph_found
-
-    def return_data_to_life_generator(self):
-        """"""
-        if len(self.get_returned_paragraph()) == 0:
-            self.paragraph_found = "I couldn't find a paragraph with " \
-                                          "these terms."
-
-        return self.get_returned_paragraph()
 
     def get_content_generator_input(self):
         """
@@ -435,12 +417,24 @@ class FindText:
 
         return paragraph_found
 
-    def parse_incoming_data(self, input_data):
-        """Parses data from csv or sockets. Taks in a string and returns two
-        string variables"""
+    def get_incoming_data(self, input_data, filetype):
+        """Gets data from csv or sockets. Takes in a string or list as
+        input_data and a string for filetype (text or csv) and returns a
+        string of data"""
+        if filetype == 'csv':
+            data = input_data[1][0].split(';')
 
-        data = input_data.split(';')
+        else:
+            data = input_data.split(';')
 
+        return data
+
+    def parse_incoming_data(self, input_data, filetype):
+        """Parses data from csv or sockets. Takes in a string or list as
+        input_data and a string for filetype (text or csv) and returns two
+        string variables."""
+
+        data = self.get_incoming_data(input_data, filetype)
         primary_keyword = data[0]
         secondary_keyword = data[1].split()[0]
 
@@ -521,14 +515,10 @@ if __name__ == "__main__":
 
         file_data = c.import_csv(sys.argv[1])
 
-        # Split the words in our file_data list by the semicolon
-        data = file_data[1][0].split(';')
-
-        primary_keyword = data[0]
-
-        secondary_keyword = data[1]
-
         f = FindText()
+
+        primary_keyword, secondary_keyword = f.parse_incoming_data(
+            file_data, 'csv')
 
         paragraph_found = f.run_paragraph_finder(primary_keyword,
                                                  secondary_keyword)
