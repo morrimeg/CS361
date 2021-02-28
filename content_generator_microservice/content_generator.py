@@ -1,5 +1,5 @@
 # Name: Megan Morrison
-# Date: February 21, 2021
+# Date: February 28, 2021
 # Class: CS 361
 # Project: Content Generator Microservice
 # Description: This file contains the following classes:
@@ -44,17 +44,14 @@ class ContentGeneratorApp(tk.Frame):
         self.paragraph_found = ''
 
     def create_labels(self):
-        """
-        Creates labels for text entry boxes.
-        :return: None
-        """
+
         tk.Label(self.master, text='Primary Word (e.g. Dog)').grid(row=2)
         tk.Label(self.master, text='Secondary Word (e.g Breed)').grid(row=3)
 
     def create_primary_keyword_entry_box(self):
         """
         Returns a string which is input as the primary keyword
-        :return: primary_entry_box:
+        :return: primary_entry_box: (string)
         """
         primary_entry_box = tk.Entry(self.master)
 
@@ -65,7 +62,7 @@ class ContentGeneratorApp(tk.Frame):
     def create_secondary_keyword_entry_box(self):
         """
         Returns a string which is input as the secondary keyword
-        :return: secondary_entry_box:
+        :return: secondary_entry_box: (string)
         """
         secondary_entry_box = tk.Entry(self.master)
 
@@ -74,10 +71,7 @@ class ContentGeneratorApp(tk.Frame):
         return secondary_entry_box
 
     def create_text_output_box(self):
-        """
-        Creates a box to hold the output text.
-        :return: output_box:
-        """
+        """ :return: output_box:"""
         output_box = tk.Text(self.master, height=40, width=40, wrap=tk.WORD)
 
         output_box.grid(row=2, column=3, columnspan=4, rowspan=4,
@@ -86,26 +80,21 @@ class ContentGeneratorApp(tk.Frame):
         return output_box
 
     def generate_paragraph_button(self):
-        """
-        Sends request to Wikipedia using the primary and secondary keywords.
-        :return None:
-        """
+        """Sends request to Wikipedia using the primary and secondary keywords."""
         tk.Button(self.master, text='Generate Paragraph',
                   command=self.run_content_generator_backend).grid(row=4,
                                                                    column=1,
                                                                    sticky=tk.W,
                                                                    pady=2)
     def request_data_button(self):
-        """
-        :return:
-        """
+        """Sends request to Life Generator for keyword data."""
         tk.Button(self.master, text='Request Life\n Generator Data',
                   command=self.get_life_generator_input).grid(row=5, column=1)
 
     def start_life_generator_client(self, message):
-        """
-        :param message:
-        :return:
+        """ Starts client socket communication to Life Generator.
+        :param message: (string)
+        :return response: (string)
         """
         # Note that Joseph Polaski and I worked together to devleop the
         # socket client/server programs. Our calls to the client and server
@@ -116,9 +105,7 @@ class ContentGeneratorApp(tk.Frame):
         return response
 
     def start_content_generator_server(self):
-        """
-        :return:
-        """
+        """Starts server for Content Generator socket."""
         # Note that Joseph Polaski and I worked together to devleop the
         # socket client/server programs. Our calls to the client and server
         # are similar since we developed the sockets together.
@@ -140,9 +127,7 @@ class ContentGeneratorApp(tk.Frame):
         return self.paragraph_found
 
     def get_life_generator_input(self):
-        """
-        :return:
-        """
+        """Recieves and manipulates data from Life Generator."""
         client_data = self.start_life_generator_client('Give me some life!')
 
         primary_keyword, secondary_keyword = FindText().parse_incoming_data(
@@ -157,18 +142,17 @@ class ContentGeneratorApp(tk.Frame):
 
 
     def get_returned_paragraph(self):
-        """Returns paragraph_found attribute"""
         return self.paragraph_found
 
     def get_content_generator_input(self):
-        """
-        Gets input from content generator GUI and returns two string variables
-        :return primary_keyword:
-        :return secondary_keyword:
+        """Gets input from content generator GUI and returns two string variables
+        :return primary_keyword: (string)
+        :return secondary_keyword: (string)
         """
         # This SO page helped me figure out how to get text out of the entry
         # boxes when using classes:
-        # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get-function-returning-nothing
+        # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get
+        # -function-returning-nothing
 
         self.output_text.delete('1.0', tk.END)
 
@@ -179,10 +163,9 @@ class ContentGeneratorApp(tk.Frame):
 
     def get_wikipedida_text(self, primary_keyword, secondary_keyword):
         """
-        Takes in two string variables and returns a string variable.
-        :param primary_keyword:
-        :param secondary_keyword:
-        :return:
+        :param primary_keyword: (string)
+        :param secondary_keyword: (string)
+        :return self.paragraph_found: (string)
         """
 
         find_text_object = FindText()
@@ -198,11 +181,9 @@ class ContentGeneratorApp(tk.Frame):
                                          secondary_keyword,
                                          paragraph):
         """
-        Takes in 3 string variables and exports data.
-        :param primary_keyword:
-        :param secondary_keyword:
-        :param paragraph_found:
-        :return:
+        :param primary_keyword: (string)
+        :param secondary_keyword: (string)
+        :param paragraph_found: (string)
         """
 
         csv_object = CsvManipulation()
@@ -211,18 +192,12 @@ class ContentGeneratorApp(tk.Frame):
                      paragraph_found)
 
     def clear_content_generator_input(self):
-        """
-        Clears entry text boxes in GUI.
-        :return:
-        """
+
         self.primary.delete(0, tk.END)
         self.secondary.delete(0, tk.END)
 
     def run_content_generator_backend(self):
-        """
-        Runs the entire content generator program.
-        :return None:
-        """
+        """Runs the entire content generator program."""
 
         primary_keyword, secondary_keyword = self.get_content_generator_input()
 
@@ -237,40 +212,38 @@ class ContentGeneratorApp(tk.Frame):
 
 
 class FindText:
+
     def __init__(self):
         self.primary_keyword = ''
         self.secondary_keyword = ''
 
     def send_http_request(self, primary_keyword):
         """
-        Takes in a string which is sent to Wikipedia and returns a string
-        of text.
-        :param primary_keyword:
-        :return parsed_page_content:
+        :param primary_keyword: (string)
+        :return parsed_page_content: (string)
         """
         # All of this code is from:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
         # -from-wikipedia-in-python-9ce07426579b
         # This code sends a request to Wikipedia and parses the returned page.
+        request_to_wiki = requests.get('https://en.wikipedia.org/wiki/' +
+                                       primary_keyword)
 
-        res = requests.get('https://en.wikipedia.org/wiki/' + primary_keyword)
-
-        parsed_page_content = BeautifulSoup(res.text, 'html.parser')
+        parsed_page_content = BeautifulSoup(request_to_wiki.text, 'html.parser')
 
         return parsed_page_content
 
     def parse_wikipedia_page_text(self, parsed_page_content):
         """
-        Takes in a string of parsed webpage content and returns it as a
-        string of text.
-        :param parsed_page_content:
-        :return text:
+        :param parsed_page_content: (string)
+        :return parsed_page_content: (string)
         """
         # All of this code is from:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
         # -from-wikipedia-in-python-9ce07426579b
         # https://stackoverflow.com/questions/43133632/web-scraping-a-wikipedia-page
         parsed_wiki_text = ''
+
         for paragraph in parsed_page_content.find_all('p'):
             parsed_wiki_text += paragraph.text
 
@@ -278,9 +251,8 @@ class FindText:
 
     def clean_text(self, parsed_text):
         """
-        Takes in a string of text, cleans it, and returns a string of text.
-        :param text:
-        :return text:
+        :param parsed_text: (string)
+        :return parsed_text_cleaned: (string)
         """
         # All of this code is from:
         # https://levelup.gitconnected.com/two-simple-ways-to-scrape-text
@@ -295,9 +267,8 @@ class FindText:
 
     def split_paragraph_text_into_lines(self, cleaned_wiki_text):
         """
-        Takes in a string variable and returns two lists of strings.
-        :param text:
-        :return:
+        :param cleaned_wiki_text: (string)
+        :return list_of_lines: (list of strings)
         """
         # We need to split each line by \n.
         # I found out how to do this from the following SO article:
@@ -310,9 +281,8 @@ class FindText:
     def remove_punctuation_and_split_into_list_of_lines(self,
                                                           cleaned_wiki_text):
         """
-        Takes in a string and returns a list of strings
-        :param text:
-        :return:
+        :param cleaned_wiki_text: (string)
+        :return list_of_line_no_punctuation:(list of strings)
         """
         # Make sure punctuation marks don't get attached to words. (e.g.'dog.', 'cat,')
         # I found the below SO helpful in parsing this out:
@@ -324,70 +294,25 @@ class FindText:
 
         return list_of_line_no_punctuation
 
-    def split_lines_into_words(self, list_of_lines_no_punctuation, index):
+    def find_paragraph(self, wikipedia_text, primary_keyword,
+                       secondary_keyword):
         """
-        Takes in a list of strings and returns a list of strings
-        :param list_of_lines:
-        :return:
+        :param wikipedia_text: (string)
+        :param primary_keyword: (string)
+        :param secondary_keyword: (string)
+        :return found_paragraph: (string)
         """
-        # split the sentence into individual words
-        # Found this SO helpful:
-        # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
-        # sentence-contains-a-certain-word-in-python-and-then-perform
-        words = list_of_lines_no_punctuation[index]
-        words_list = words.split()
-        return words_list
+        list_of_lines = self.split_paragraph_text_into_lines(wikipedia_text)
 
-    def do_primary_and_secondary_words_exist_in_text(self, primary_keyword,
-                                                     secondary_keyword, text):
-        """
-
-        :param primary_keyword:
-        :param secondary_keyword:
-        :param text:
-        :return:
-        """
-        index = 0
-        list_of_lines = self.split_paragraph_text_into_lines(text)
-        words_list = self.split_lines_into_words(list_of_lines, index)
-        if primary_keyword.lower() in words_list and secondary_keyword.lower() in words_list:
-            return True
-
-    def find_paragraph(self, text, primary_keyword, secondary_keyword):
-        """
-        Takes in three string arguements, finds the text in a paragraph,
-        and returns a string of text.
-        :param text:
-        :param primary_keyword
-        :param secondary_keyword
-        :return found_paragraph:
-        """
-        # # We need to split each line by \n.
-        # # I found out how to do this from the following SO article:
-        # # https://stackoverflow.com/questions/14801057/python-splitting-to-the
-        # # -newline-character
-        # list_of_lines = text.splitlines()
-        #
-        # # Make sure punctuation marks don't get attached to words. (e.g.
-        # # 'dog.', 'cat,')
-        # # I found the below SO helpful in parsing this out:
-        # # https://stackoverflow.com/questions/59877761/how-to-strip-string-from
-        # # -punctuation-except-apostrophes-for-nlp?noredirect=1&lq=1
-        # text_no_punctuation = re.sub(r'[^\w\d\s\']+', '', text)
-        # list_of_line_no_punctuation = text_no_punctuation.splitlines()
-
-        list_of_lines = self.split_paragraph_text_into_lines(text)
         list_of_lines_no_punctuation = \
-            self.remove_punctuation_and_split_into_list_of_lines(text)
-        #words = self.split_lines_into_words(index, text)
+            self.remove_punctuation_and_split_into_list_of_lines(wikipedia_text)
 
         found_paragraph = []
 
         for i in range(len(list_of_lines)):
-            # # split the sentence into individual words
-            # # Found this SO helpful:
-            # # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
-            # # sentence-contains-a-certain-word-in-python-and-then-perform
+            # Found this SO helpful:
+            # https://stackoverflow.com/questions/3897942/how-do-i-check-if-a-
+            # sentence-contains-a-certain-word-in-python-and-then-perform
             words = list_of_lines_no_punctuation[i]
             words_list = words.split()
 
@@ -400,11 +325,9 @@ class FindText:
 
     def run_paragraph_finder(self, primary_keyword, secondary_keyword):
         """
-        Takes in two string variables, finds a paragraph from Wiki,
-        and returns as string variable.
-        :param primary_keyword:
-        :param secondary_keyword:
-        :return paragraph_found:
+        :param primary_keyword: (string)
+        :param secondary_keyword: (string)
+        :return paragraph_found: (string)
         """
         wiki_page = self.send_http_request(primary_keyword)
 
@@ -418,9 +341,11 @@ class FindText:
         return paragraph_found
 
     def get_incoming_data(self, input_data, filetype):
-        """Gets data from csv or sockets. Takes in a string or list as
-        input_data and a string for filetype (text or csv) and returns a
-        string of data"""
+        """Gets data from csv or sockets. filetype can be 'csv' or 'text'
+        :param input_data: (string)
+        :param filetype: (string)
+        :return words_data: (string or list)
+        """
         if filetype == 'csv':
             words_data = input_data[1][0].split(';')
 
@@ -430,9 +355,12 @@ class FindText:
         return words_data
 
     def parse_incoming_data(self, input_data, filetype):
-        """Parses data from csv or sockets. Takes in a string or list as
-        input_data and a string for filetype (text or csv) and returns two
-        string variables."""
+        """Parses data from csv or sockets. filetype can be 'csv' or 'text'
+        :param input_data: (string or list)
+        :param filetype: (string)
+        :return primary_keyword: (string)
+        :return secondary_keyword: (string)
+        """
 
         words_data = self.get_incoming_data(input_data, filetype)
         primary_keyword = words_data[0]
@@ -451,9 +379,8 @@ class CsvManipulation:
 
     def import_csv(self, filename):
         """
-        Takes in a string variable, imports the csv, and returns a string.
-        :param filename:
-        :return: data
+        :param filename: (string)
+        :return data_from_csv: (list)
         """
         # Found this SO helpful: https://stackoverflow.com/questions/24662571/
         # python-import-csv-to-list
@@ -465,12 +392,10 @@ class CsvManipulation:
 
     def export_csv(self, filename, first_word, second_word, paragraph):
         """
-        Takes in 4 string variables and exports to a csv.
-        :param filename:
-        :param first_word:
-        :param second_word:
-        :param paragraph:
-        :return: Nothing
+        :param filename: (string)
+        :param first_word: (string)
+        :param second_word: (string)
+        :param paragraph: (string)
         """
         # Source: https://realpython.com/python-csv/
         with open(filename, mode='w') as output_file:
@@ -481,7 +406,6 @@ class CsvManipulation:
             output_writer.writerow(['input_keywords', 'output_content'])
 
             output_writer.writerow([first_word + ';' + second_word, paragraph])
-
 
 
 if __name__ == "__main__":
@@ -531,13 +455,3 @@ if __name__ == "__main__":
     else:
         print('Incorrect Argument(s) Provided. Quitting.')
         exit()
-
-
-# This is how the program is gonna work
-# 1. Open both programs
-# 2. In Content Generator click request button
-# 3. Request made & data sent back
-# 4. Content gen runs paragraph finder & stores paragraph
-# 5. Go into Life Generator & click request button
-# 6. Content gen sends back stored paragraph
-# 5. Life Gen displays paragraph data.
