@@ -134,8 +134,8 @@ class ContentGeneratorApp(tk.Frame):
         print(f'The request was: {request}')
 
         if len(self.get_returned_paragraph()) == 0:
-            self.paragraph_found = 'I couldn\'t find a paragraph with " \
-                                          "these terms.'
+            self.paragraph_found = 'I couldn\'t find a paragraph with ' \
+                                          'these terms.'
 
         return self.paragraph_found
 
@@ -353,6 +353,7 @@ class FindText:
         if primary_keyword.lower() in words_list and secondary_keyword.lower() in words_list:
             return True
 
+    def find_paragraph(self, text, primary_keyword, secondary_keyword):
         """
         Takes in three string arguements, finds the text in a paragraph,
         and returns a string of text.
