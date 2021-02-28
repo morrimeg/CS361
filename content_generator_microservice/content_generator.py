@@ -422,21 +422,21 @@ class FindText:
         input_data and a string for filetype (text or csv) and returns a
         string of data"""
         if filetype == 'csv':
-            data = input_data[1][0].split(';')
+            words_data = input_data[1][0].split(';')
 
         else:
-            data = input_data.split(';')
+            words_data = input_data.split(';')
 
-        return data
+        return words_data
 
     def parse_incoming_data(self, input_data, filetype):
         """Parses data from csv or sockets. Takes in a string or list as
         input_data and a string for filetype (text or csv) and returns two
         string variables."""
 
-        data = self.get_incoming_data(input_data, filetype)
-        primary_keyword = data[0]
-        secondary_keyword = data[1].split()[0]
+        words_data = self.get_incoming_data(input_data, filetype)
+        primary_keyword = words_data[0]
+        secondary_keyword = words_data[1].split()[0]
 
         secondary_keyword = re.sub(r'[^\w\d\s\']+', '', secondary_keyword)
 
@@ -457,11 +457,11 @@ class CsvManipulation:
         """
         # Found this SO helpful: https://stackoverflow.com/questions/24662571/
         # python-import-csv-to-list
-        with open(filename, newline='') as f:
-            reader = csv.reader(f)
-            data = list(reader)
+        with open(filename, newline='') as file:
+            csv_reader = csv.reader(file)
+            data_from_csv = list(csv_reader)
 
-        return data
+        return data_from_csv
 
     def export_csv(self, filename, first_word, second_word, paragraph):
         """
