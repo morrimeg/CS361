@@ -21,7 +21,8 @@ from bs4 import BeautifulSoup
 
 # References:
 # How to get content from Wikipedia:
-# https://levelup.gitconnected.com/two-simple-ways-to-scrape-text-from-wikipedia-in-python-9ce07426579b
+# https://levelup.gitconnected.com/two-simple-ways-to-scrape-text-from-
+# wikipedia-in-python-9ce07426579b
 
 # Building a Tkinter App:
 # https://www.python-course.eu/tkinter_entry_widgets.php
@@ -102,7 +103,13 @@ class ContentGeneratorApp(tk.Frame):
                   command=self.get_life_generator_input).grid(row=5, column=1)
 
     def start_life_generator_client(self, message):
-        """"""
+        """
+        :param message:
+        :return:
+        """
+        # Note that Joseph Polaski and I worked together to devleop the
+        # socket client/server programs. Our calls to the client and server
+        # are similar since we developed the sockets together.
         client = micro_client('LIFE_GEN')  # create a life generator
         response = client.send_message(message)
         print(response) # Take out!!
@@ -112,25 +119,32 @@ class ContentGeneratorApp(tk.Frame):
         """
         :return:
         """
+        # Note that Joseph Polaski and I worked together to devleop the
+        # socket client/server programs. Our calls to the client and server
+        # are similar since we developed the sockets together.
         server = micro_server(self.content_generator_server_callback, "CONT_GEN")
         run_server_thread = threading.Thread(target=server.start_listening)
         run_server_thread.start()
 
     def content_generator_server_callback(self, request):
+        """Returns data to the Life Generator when requested."""
+        # Note that Joseph Polaski and I worked together to devleop the
+        # socket client/server programs. Our calls to the client and server
+        # are similar since we developed the sockets together.
         print(f"The request was: {request}")
 
-        content_generator_paragraph = self.return_data_to_life_generator()
-        print("callback from content gen server") #TAKE OUT
+        if len(self.get_returned_paragraph()) == 0:
+            self.paragraph_found = "I couldn't find a paragraph with " \
+                                          "these terms."
+        #content_generator_paragraph = self.return_data_to_life_generator()
 
-        return content_generator_paragraph
+        return self.paragraph_found #content_generator_paragraph
 
     def get_life_generator_input(self):
         """
         :return:
         """
-        # Get data back from Client
         client_data = self.start_life_generator_client('Give me some life!')
-        print("client data rec ", client_data)  # TAKE OUT
 
         primary_keyword, secondary_keyword = FindText().parse_incoming_data(
             client_data)
@@ -150,11 +164,10 @@ class ContentGeneratorApp(tk.Frame):
         self.paragraph_found = self.get_wikipedida_text(primary_keyword,
                                                    secondary_keyword)
 
-        print(self.paragraph_found) # TAKE OUT
-
         return self.paragraph_found
 
     def get_returned_paragraph(self):
+        """Returns paragraph_found attribute"""
         return self.paragraph_found
 
     def return_data_to_life_generator(self):
@@ -328,7 +341,8 @@ class FindText:
 
         return list_of_line_no_punctuation
 
-    def split_lines_into_words(self,list_of_lines_no_punctuation, index, text):
+    def split_lines_into_words(self, list_of_lines_no_punctuation, index,
+                               text):
         """
         Takes in a list of strings and returns a list of strings
         :param list_of_lines:
@@ -424,11 +438,13 @@ class FindText:
     def parse_incoming_data(self, input_data):
         """Parses data from csv or sockets. Taks in a string and returns two
         string variables"""
-        # Split the words in our file_data list by the semicolon
+
         data = input_data.split(';')
 
         primary_keyword = data[0]
         secondary_keyword = data[1].split()[0]
+
+        secondary_keyword = re.sub(r'[^\w\d\s\']+', '', secondary_keyword)
 
         return primary_keyword, secondary_keyword
 
