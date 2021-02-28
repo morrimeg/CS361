@@ -48,8 +48,8 @@ class ContentGeneratorApp(tk.Frame):
         Creates labels for text entry boxes.
         :return: None
         """
-        tk.Label(self.master, text="Primary Word (e.g. Dog)").grid(row=2)
-        tk.Label(self.master, text="Secondary Word (e.g Breed)").grid(row=3)
+        tk.Label(self.master, text='Primary Word (e.g. Dog)').grid(row=2)
+        tk.Label(self.master, text='Secondary Word (e.g Breed)').grid(row=3)
 
     def create_primary_keyword_entry_box(self):
         """
@@ -122,7 +122,7 @@ class ContentGeneratorApp(tk.Frame):
         # Note that Joseph Polaski and I worked together to devleop the
         # socket client/server programs. Our calls to the client and server
         # are similar since we developed the sockets together.
-        server = micro_server(self.content_generator_server_callback, "CONT_GEN")
+        server = micro_server(self.content_generator_server_callback, 'CONT_GEN')
         run_server_thread = threading.Thread(target=server.start_listening)
         run_server_thread.start()
 
@@ -131,11 +131,11 @@ class ContentGeneratorApp(tk.Frame):
         # Note that Joseph Polaski and I worked together to devleop the
         # socket client/server programs. Our calls to the client and server
         # are similar since we developed the sockets together.
-        print(f"The request was: {request}")
+        print(f'The request was: {request}')
 
         if len(self.get_returned_paragraph()) == 0:
-            self.paragraph_found = "I couldn't find a paragraph with " \
-                                          "these terms."
+            self.paragraph_found = 'I couldn\'t find a paragraph with " \
+                                          "these terms.'
 
         return self.paragraph_found
 
@@ -238,8 +238,8 @@ class ContentGeneratorApp(tk.Frame):
 
 class FindText:
     def __init__(self):
-        self.primary_keyword = ""
-        self.secondary_keyword = ""
+        self.primary_keyword = ''
+        self.secondary_keyword = ''
 
     def send_http_request(self, primary_keyword):
         """
@@ -253,7 +253,7 @@ class FindText:
         # -from-wikipedia-in-python-9ce07426579b
         # This code sends a request to Wikipedia and parses the returned page.
 
-        res = requests.get("https://en.wikipedia.org/wiki/" + primary_keyword)
+        res = requests.get('https://en.wikipedia.org/wiki/' + primary_keyword)
 
         parsed_page_content = BeautifulSoup(res.text, 'html.parser')
 
@@ -307,7 +307,7 @@ class FindText:
 
         return list_of_lines
 
-    def remove_punctionation_and_split_into_list_of_lines(self,
+    def remove_punctuation_and_split_into_list_of_lines(self,
                                                           cleaned_wiki_text):
         """
         Takes in a string and returns a list of strings
@@ -353,7 +353,6 @@ class FindText:
         if primary_keyword.lower() in words_list and secondary_keyword.lower() in words_list:
             return True
 
-    def find_paragraph(self, text, primary_keyword, secondary_keyword):
         """
         Takes in three string arguements, finds the text in a paragraph,
         and returns a string of text.
@@ -378,7 +377,7 @@ class FindText:
 
         list_of_lines = self.split_paragraph_text_into_lines(text)
         list_of_lines_no_punctuation = \
-            self.remove_punctionation_and_split_into_list_of_lines(text)
+            self.remove_punctuation_and_split_into_list_of_lines(text)
         #words = self.split_lines_into_words(index, text)
 
         found_paragraph = []
@@ -492,14 +491,14 @@ if __name__ == "__main__":
         # Again, I got this code from the following site:
         # https://www.python-course.eu/tkinter_entry_widgets.php
         root = tk.Tk()
-        root.title("Content Generator")
+        root.title('Content Generator')
         root.geometry('1000x650')
 
         # Used this for learning how to scale widgets:
         # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
-        tk.Label(root, text="Welcome to the Content Generator! Please "
-                            "place your search terms in the boxes "
-                            "below \nin order to find a paragraph.").grid(
+        tk.Label(root, text='Welcome to the Content Generator! Please '
+                            'place your search terms in the boxes '
+                            'below \nin order to find a paragraph.').grid(
             row=0,
             column=3,
             columnspan=5,
@@ -510,7 +509,7 @@ if __name__ == "__main__":
         app.mainloop()
 
     # Else, read in the input file.
-    elif sys.argv[1] == "input.csv":
+    elif sys.argv[1] == 'input.csv':
 
         csv_object = CsvManipulation()
 
@@ -529,7 +528,7 @@ if __name__ == "__main__":
 
     # Otherwise, if an incorrect argument was input, quit.
     else:
-        print("Incorrect Argument(s) Provided. Quitting.")
+        print('Incorrect Argument(s) Provided. Quitting.')
         exit()
 
 
