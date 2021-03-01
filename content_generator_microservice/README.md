@@ -19,3 +19,36 @@ dog;breed
 ---
 Running the Program
 ---
+First, make sure the following files are in the same directory:  
+```
+requirements.txt
+content-generator.py
+server.py
+client.py
+input.csv (optionally provided)
+```
+
+**To run the program use these steps below:**
+
+1. Open the terminal (Mac/Linux) or cmd.exe (Windows)   
+   
+
+2. In the command line, create this virtual environment:
+```
+virtualenv content-generator --python=python3
+```
+3. Install requirements.txt by running this command in the command line:
+```
+pip3 install -r requirements.txt
+```
+   
+4. Run the following command to run the Content Generator GUI:
+```
+python3 content-generator.py
+```
+5. If you would like to use the Content Generator with a CSV, run the 
+   following command:
+   
+```
+python3 content-generator.py input.csv
+```
