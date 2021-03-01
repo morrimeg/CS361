@@ -49,10 +49,7 @@ class ContentGeneratorApp(tk.Frame):
         tk.Label(self.master, text='Secondary Word (e.g Breed)').grid(row=3)
 
     def create_primary_keyword_entry_box(self):
-        """
-        Returns a string which is input as the primary keyword
-        :return: primary_entry_box: (string)
-        """
+        """:return: primary_entry_box: (string)"""
         primary_entry_box = tk.Entry(self.master)
 
         primary_entry_box.grid(row=2, column=1, sticky=tk.W, pady=2)
@@ -60,10 +57,7 @@ class ContentGeneratorApp(tk.Frame):
         return primary_entry_box
 
     def create_secondary_keyword_entry_box(self):
-        """
-        Returns a string which is input as the secondary keyword
-        :return: secondary_entry_box: (string)
-        """
+        """:return: secondary_entry_box: (string)"""
         secondary_entry_box = tk.Entry(self.master)
 
         secondary_entry_box.grid(row=3, column=1, sticky=tk.W)
@@ -129,6 +123,7 @@ class ContentGeneratorApp(tk.Frame):
     def get_life_generator_input(self):
         """Recieves and manipulates data from Life Generator."""
         client_data = self.start_life_generator_client('Give me some life!')
+        print("Data from Life Generator: ", client_data)
 
         primary_keyword, secondary_keyword = FindText().parse_incoming_data(
             client_data, 'text')
