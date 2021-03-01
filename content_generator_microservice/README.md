@@ -47,11 +47,11 @@ source content-generator/bin/activate
 pip3 install -r requirements.txt
 ```
    
-4. Run the following command to run the Content Generator GUI:
+5. Run the following command to run the Content Generator GUI:
 ```
 python3 content-generator.py
 ```
-4. If you would like to use the Content Generator with a CSV, run the 
+6. If you would like to use the Content Generator with a CSV, run the 
    following command:
    
 ```
