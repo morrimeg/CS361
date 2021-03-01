@@ -37,7 +37,12 @@ input.csv (optionally provided)
 ```
 virtualenv content-generator --python=python3
 ```
-3. Install requirements.txt by running this command in the command line:
+3. Activate the virtual environment: 
+```
+source content-generator/bin/activate
+```
+
+4. Install requirements.txt by running this command in the command line:
 ```
 pip3 install -r requirements.txt
 ```
@@ -46,7 +51,7 @@ pip3 install -r requirements.txt
 ```
 python3 content-generator.py
 ```
-5. If you would like to use the Content Generator with a CSV, run the 
+4. If you would like to use the Content Generator with a CSV, run the 
    following command:
    
 ```
