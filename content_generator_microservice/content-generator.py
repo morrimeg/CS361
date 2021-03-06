@@ -15,9 +15,11 @@ import requests
 import sys
 import tkinter as tk
 import threading
+from tkinter import messagebox as msg
 from server import micro_server
 from client import micro_client
 from bs4 import BeautifulSoup
+
 
 # References:
 # How to get content from Wikipedia:
@@ -36,17 +38,20 @@ class ContentGeneratorApp(tk.Frame):
         self.master = master
         self.grid()
         self.create_labels()
+        self.show_new_features()
         self.primary = self.create_primary_keyword_entry_box()
         self.secondary = self.create_secondary_keyword_entry_box()
         self.output_text = self.create_text_output_box()
         self.generate_paragraph_button()
         self.request_data_button()
+        self.clear_data_button()
         self.paragraph_found = ''
 
     def create_labels(self):
-
-        tk.Label(self.master, text='Primary Word (e.g. Dog)').grid(row=2)
-        tk.Label(self.master, text='Secondary Word (e.g Breed)').grid(row=3)
+        tk.Label(self.master, text='Primary Word (e.g. Dog): ').grid(row=2)
+        tk.Label(self.master, text='Secondary Word (e.g Breed): ').grid(row=3)
+        tk.Label(self.master, text='Paragraphs found will be displayed '
+                                   'below: ').grid(row=1, column=4)
 
     def create_primary_keyword_entry_box(self):
         """:return: primary_entry_box: (string)"""
@@ -73,17 +78,35 @@ class ContentGeneratorApp(tk.Frame):
 
         return output_box
 
+    def show_new_features(self):
+        msg.showinfo('New Features', 'You can now connect the Content '
+                                     'Generator to the Life Generator.\n\n'
+                                     'Click on the "Request Life '
+                                     'Generator Data" button to get\n'
+                                     'information on Amazon products.\n\nInput'
+                                     ' is not necessary to get this '
+                                     'information.')
+
     def generate_paragraph_button(self):
         """Sends request to Wikipedia using the primary and secondary keywords."""
         tk.Button(self.master, text='Generate Paragraph',
                   command=self.run_content_generator_backend).grid(row=4,
-                                                                   column=1,
-                                                                   sticky=tk.W,
-                                                                   pady=2)
+                                                                   column=0)
+
     def request_data_button(self):
         """Sends request to Life Generator for keyword data."""
         tk.Button(self.master, text='Request Life\n Generator Data',
-                  command=self.get_life_generator_input).grid(row=5, column=1)
+                  command=self.get_life_generator_input).grid(row=5, column=0)
+
+    def clear_data_button(self):
+        tk.Button(self.master, text='Clear',
+                  command=self.clear_content_generator_input).grid(row=4,
+
+                                                                   column=1)
+
+    def undo_button(self):
+        tk.Button(self.master, text='Undo',
+                  command=self.primary.edit_undo)
 
     def start_life_generator_client(self, message):
         """ Starts client socket communication to Life Generator.
@@ -103,7 +126,8 @@ class ContentGeneratorApp(tk.Frame):
         # Note that Joseph Polaski and I worked together to devleop the
         # socket client/server programs. Our calls to the client and server
         # are similar since we developed the sockets together.
-        server = micro_server(self.content_generator_server_callback, 'CONT_GEN')
+        server = micro_server(self.content_generator_server_callback,
+                              'CONT_GEN')
         run_server_thread = threading.Thread(target=server.start_listening)
         run_server_thread.start()
 
@@ -116,12 +140,13 @@ class ContentGeneratorApp(tk.Frame):
 
         if len(self.get_returned_paragraph()) == 0:
             self.paragraph_found = 'I couldn\'t find a paragraph with ' \
-                                          'these terms.'
+                                   'these terms.'
 
         return self.paragraph_found
 
     def get_life_generator_input(self):
         """Recieves and manipulates data from Life Generator."""
+
         client_data = self.start_life_generator_client('Give me some life!')
         print("Data from Life Generator: ", client_data)
 
@@ -129,12 +154,11 @@ class ContentGeneratorApp(tk.Frame):
             client_data, 'text')
 
         self.paragraph_found = self.get_wikipedida_text(primary_keyword,
-                                                   secondary_keyword)
+                                                        secondary_keyword)
 
         self.output_content_generator_results(primary_keyword,
                                               secondary_keyword,
                                               self.paragraph_found)
-
 
     def get_returned_paragraph(self):
         return self.paragraph_found
@@ -149,7 +173,7 @@ class ContentGeneratorApp(tk.Frame):
         # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get
         # -function-returning-nothing
 
-        self.output_text.delete('1.0', tk.END)
+        # self.output_text.delete('1.0', tk.END)
 
         primary_keyword = self.primary.get()
         secondary_keyword = self.secondary.get()
@@ -165,8 +189,9 @@ class ContentGeneratorApp(tk.Frame):
 
         find_text_object = FindText()
 
-        self.paragraph_found = find_text_object.run_paragraph_finder(primary_keyword,
-                                                  secondary_keyword)
+        self.paragraph_found = find_text_object.run_paragraph_finder(
+            primary_keyword,
+            secondary_keyword)
 
         self.output_text.insert('1.0', self.paragraph_found)
 
@@ -183,13 +208,14 @@ class ContentGeneratorApp(tk.Frame):
 
         csv_object = CsvManipulation()
 
-        csv_object.export_csv('output.csv', primary_keyword, secondary_keyword, self.
-                     paragraph_found)
+        csv_object.export_csv('output.csv', primary_keyword, secondary_keyword,
+                              self.
+                              paragraph_found)
 
     def clear_content_generator_input(self):
-
         self.primary.delete(0, tk.END)
         self.secondary.delete(0, tk.END)
+        self.output_text.delete('1.0', tk.END)
 
     def run_content_generator_backend(self):
         """Runs the entire content generator program."""
@@ -197,13 +223,13 @@ class ContentGeneratorApp(tk.Frame):
         primary_keyword, secondary_keyword = self.get_content_generator_input()
 
         self.paragraph_found = self.get_wikipedida_text(primary_keyword,
-                                                    secondary_keyword)
+                                                        secondary_keyword)
 
         self.output_content_generator_results(primary_keyword,
                                               secondary_keyword,
                                               self.paragraph_found)
 
-        self.clear_content_generator_input()
+        # self.clear_content_generator_input()
 
 
 class FindText:
@@ -224,7 +250,8 @@ class FindText:
         request_to_wiki = requests.get('https://en.wikipedia.org/wiki/' +
                                        primary_keyword)
 
-        parsed_page_content = BeautifulSoup(request_to_wiki.text, 'html.parser')
+        parsed_page_content = BeautifulSoup(request_to_wiki.text,
+                                            'html.parser')
 
         return parsed_page_content
 
@@ -274,7 +301,7 @@ class FindText:
         return list_of_lines
 
     def remove_punctuation_and_split_into_list_of_lines(self,
-                                                          cleaned_wiki_text):
+                                                        cleaned_wiki_text):
         """
         :param cleaned_wiki_text: (string)
         :return list_of_line_no_punctuation:(list of strings)
@@ -300,7 +327,8 @@ class FindText:
         list_of_lines = self.split_paragraph_text_into_lines(wikipedia_text)
 
         list_of_lines_no_punctuation = \
-            self.remove_punctuation_and_split_into_list_of_lines(wikipedia_text)
+            self.remove_punctuation_and_split_into_list_of_lines(
+                wikipedia_text)
 
         found_paragraph = []
 
@@ -416,12 +444,19 @@ if __name__ == "__main__":
 
         # Used this for learning how to scale widgets:
         # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
-        tk.Label(root, text='Welcome to the Content Generator! Please '
+        tk.Label(root, text='Welcome to the Content Generator!\n',
+                 font='Helvetica 18 bold').grid(
+            row=0,
+            column=2,
+            columnspan=4,
+            sticky=tk.NSEW)
+
+        tk.Label(root, text='\nPlease '
                             'place your search terms in the boxes '
                             'below \nin order to find a paragraph.').grid(
-            row=0,
-            column=3,
-            columnspan=5,
+            row=1,
+            column=0,
+            columnspan=3,
             sticky=tk.NSEW)
 
         app = ContentGeneratorApp(master=root)
@@ -440,11 +475,12 @@ if __name__ == "__main__":
         primary_keyword, secondary_keyword = find_text_object.parse_incoming_data(
             file_data, 'csv')
 
-        paragraph_found = find_text_object.run_paragraph_finder(primary_keyword,
-                                                 secondary_keyword)
+        paragraph_found = find_text_object.run_paragraph_finder(
+            primary_keyword,
+            secondary_keyword)
 
         csv_object.export_csv('output.csv', primary_keyword, secondary_keyword,
-                     paragraph_found)
+                              paragraph_found)
 
     # Otherwise, if an incorrect argument was input, quit.
     else:

@@ -1,6 +1,6 @@
 # Content Generator Microservice
 
-The Content Generator microservice is a Wikipedia wescrapper. 
+The Content Generator microservice is a Wikipedia webscrapper. 
 The user is asked to input two words they want to search for. The first
 word will pull that Wikipedia page and all of it's contents. The second word
 is used for searching the text of the Wikipedia page. 
