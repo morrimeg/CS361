@@ -37,6 +37,8 @@ class ContentGeneratorApp(tk.Frame):
         super().__init__(master)
         self.master = master
         self.grid()
+        self.app_title()
+        self.app_gui_size()
         self.create_labels()
         self.show_new_features()
         self.primary = self.create_primary_keyword_entry_box()
@@ -47,9 +49,33 @@ class ContentGeneratorApp(tk.Frame):
         self.clear_data_button()
         self.paragraph_found = ''
 
+    def app_title(self):
+        self.master.title('Content Generator')
+
+    def app_gui_size(self):
+        self.master.geometry('1000x650')
+
+
+    #def start_app(self):
+
+
     def create_labels(self):
-        tk.Label(self.master, text='Primary Word (e.g. Dog): ').grid(row=2)
-        tk.Label(self.master, text='Secondary Word (e.g Breed): ').grid(row=3)
+        # Used this for learning how to scale widgets:
+        # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
+        tk.Label(self.master, text='Welcome to the Content Generator!\n',
+                 font='Helvetica 18 bold').grid(row=0, column=1, columnspan=4,
+                                                sticky=tk.NSEW)
+
+        tk.Label(self.master, text='\nPlease '
+                            'place your search terms in the boxes '
+                            'below \nin order to find a paragraph.').grid(row=1,
+                 column=0, columnspan=3, sticky=tk.NSEW)
+
+        tk.Label(self.master, text='Primary Word\n (should be a noun e.g. '
+                                   'Dog): ').grid(row=2)
+
+        tk.Label(self.master, text='Secondary Word\n (can be any part of '
+                                   'speech e.g Breed): ').grid(row=3)
         tk.Label(self.master, text='Paragraphs found will be displayed '
                                    'below: ').grid(row=1, column=4)
 
@@ -91,7 +117,7 @@ class ContentGeneratorApp(tk.Frame):
         """Sends request to Wikipedia using the primary and secondary keywords."""
         tk.Button(self.master, text='Generate Paragraph',
                   command=self.run_content_generator_backend).grid(row=4,
-                                                                   column=0)
+                                                                   column=1)
 
     def request_data_button(self):
         """Sends request to Life Generator for keyword data."""
@@ -99,14 +125,9 @@ class ContentGeneratorApp(tk.Frame):
                   command=self.get_life_generator_input).grid(row=5, column=0)
 
     def clear_data_button(self):
-        tk.Button(self.master, text='Clear',
+        tk.Button(self.master, text='Clear Data',
                   command=self.clear_content_generator_input).grid(row=4,
-
-                                                                   column=1)
-
-    def undo_button(self):
-        tk.Button(self.master, text='Undo',
-                  command=self.primary.edit_undo)
+                                                                   column=0)
 
     def start_life_generator_client(self, message):
         """ Starts client socket communication to Life Generator.
@@ -209,8 +230,7 @@ class ContentGeneratorApp(tk.Frame):
         csv_object = CsvManipulation()
 
         csv_object.export_csv('output.csv', primary_keyword, secondary_keyword,
-                              self.
-                              paragraph_found)
+                              self.paragraph_found)
 
     def clear_content_generator_input(self):
         self.primary.delete(0, tk.END)
@@ -228,8 +248,6 @@ class ContentGeneratorApp(tk.Frame):
         self.output_content_generator_results(primary_keyword,
                                               secondary_keyword,
                                               self.paragraph_found)
-
-        # self.clear_content_generator_input()
 
 
 class FindText:
@@ -431,7 +449,7 @@ class CsvManipulation:
             output_writer.writerow([first_word + ';' + second_word, paragraph])
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # If there is only one argument in the command prompt run the GUI.
     if len(sys.argv) == 1:
 
@@ -439,25 +457,6 @@ if __name__ == "__main__":
         # Again, I got this code from the following site:
         # https://www.python-course.eu/tkinter_entry_widgets.php
         root = tk.Tk()
-        root.title('Content Generator')
-        root.geometry('1000x650')
-
-        # Used this for learning how to scale widgets:
-        # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
-        tk.Label(root, text='Welcome to the Content Generator!\n',
-                 font='Helvetica 18 bold').grid(
-            row=0,
-            column=2,
-            columnspan=4,
-            sticky=tk.NSEW)
-
-        tk.Label(root, text='\nPlease '
-                            'place your search terms in the boxes '
-                            'below \nin order to find a paragraph.').grid(
-            row=1,
-            column=0,
-            columnspan=3,
-            sticky=tk.NSEW)
 
         app = ContentGeneratorApp(master=root)
         app.start_content_generator_server()
