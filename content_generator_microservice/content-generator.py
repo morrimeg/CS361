@@ -39,7 +39,8 @@ class ContentGeneratorApp(tk.Frame):
         self.grid()
         self.app_title()
         self.app_gui_size()
-        self.create_labels()
+        self.create_main_gui_labels()
+        self.create_keyword_labels()
         self.show_new_features()
         self.primary = self.create_primary_keyword_entry_box()
         self.secondary = self.create_secondary_keyword_entry_box()
@@ -55,11 +56,7 @@ class ContentGeneratorApp(tk.Frame):
     def app_gui_size(self):
         self.master.geometry('1000x650')
 
-
-    #def start_app(self):
-
-
-    def create_labels(self):
+    def create_main_gui_labels(self):
         # Used this for learning how to scale widgets:
         # https://stackoverflow.com/questions/18252434/scaling-tkinter-widgets
         tk.Label(self.master, text='Welcome to the Content Generator!\n',
@@ -67,17 +64,19 @@ class ContentGeneratorApp(tk.Frame):
                                                 sticky=tk.NSEW)
 
         tk.Label(self.master, text='\nPlease '
-                            'place your search terms in the boxes '
-                            'below \nin order to find a paragraph.').grid(row=1,
-                 column=0, columnspan=3, sticky=tk.NSEW)
+                                   'place your search terms in the boxes '
+                                   'below \nin order to find a paragraph.').grid(
+                row=1, column=0, columnspan=3, sticky=tk.NSEW)
 
+        tk.Label(self.master, text='Paragraphs found will be displayed '
+                                   'below: ').grid(row=1, column=4)
+
+    def create_keyword_labels(self):
         tk.Label(self.master, text='Primary Word\n (should be a noun e.g. '
                                    'Dog): ').grid(row=2)
 
         tk.Label(self.master, text='Secondary Word\n (can be any part of '
                                    'speech e.g Breed): ').grid(row=3)
-        tk.Label(self.master, text='Paragraphs found will be displayed '
-                                   'below: ').grid(row=1, column=4)
 
     def create_primary_keyword_entry_box(self):
         """:return: primary_entry_box: (string)"""
