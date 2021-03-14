@@ -1,5 +1,5 @@
 # Name: Megan Morrison
-# Date: February 28, 2021
+# Date: March 12, 2021
 # Class: CS 361
 # Project: Content Generator Microservice
 # Description: This file contains the following classes:
@@ -193,8 +193,6 @@ class ContentGeneratorApp(tk.Frame):
         # https://stackoverflow.com/questions/10727131/why-is-tkinter-entrys-get
         # -function-returning-nothing
 
-        # self.output_text.delete('1.0', tk.END)
-
         primary_keyword = self.primary.get()
         secondary_keyword = self.secondary.get()
 
@@ -317,8 +315,7 @@ class FindText:
 
         return list_of_lines
 
-    def remove_punctuation_and_split_into_list_of_lines(self,
-                                                        cleaned_wiki_text):
+    def remove_punctuation_and_split_into_list_of_lines(self,cleaned_wiki_text):
         """
         :param cleaned_wiki_text: (string)
         :return list_of_line_no_punctuation:(list of strings)
@@ -333,8 +330,7 @@ class FindText:
 
         return list_of_line_no_punctuation
 
-    def find_paragraph(self, wikipedia_text, primary_keyword,
-                       secondary_keyword):
+    def find_paragraph(self, wikipedia_text, primary_keyword,secondary_keyword):
         """
         :param wikipedia_text: (string)
         :param primary_keyword: (string)
